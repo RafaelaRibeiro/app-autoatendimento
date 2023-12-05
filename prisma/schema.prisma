@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model GCC_TOKEN {
+  GCC_T_GCC_COD String @db.Char(3)
+  gcc_t_token   String @db.VarChar()
+  GCC_T_STATUS  String @default("A") @db.Char(1)
+
+  @@id([GCC_T_GCC_COD], map: "GCC_TOKEN_PK")
+}
+
+model psv_totem {
+  psv_t_psv_cod        Int
+  psv_t_prefixo        String    @db.VarChar(5)
+  psv_t_titulo         String    @db.VarChar(50)
+  psv_t_ordem          Int?
+  psv_t_qdt            Int?
+  psv_t_cnt            Int?
+  psv_t_ind_prox       String?   @db.Char(1)
+  psv_t_ult_chamado    String?   @db.VarChar(5)
+  psv_t_dthr_alteracao DateTime? @db.DateTime
+
+  @@id([psv_t_psv_cod, psv_t_prefixo], map: "psv_totem_pk")
+}
