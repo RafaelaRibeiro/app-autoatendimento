@@ -7,6 +7,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model FLE {
+  FLE_DTHR_CHEGADA           DateTime  @db.DateTime
+  FLE_PSV_COD                Int
+  FLE_STR_COD                String    @db.Char(3)
+  FLE_PAC_REG                Int
+  FLE_DTHR_ATENDIMENTO       DateTime? @db.DateTime
+  FLE_ORDEM                  Decimal   @db.Decimal(4, 0)
+  FLE_STATUS                 String    @db.Char(1)
+  FLE_USR_LOGIN              String    @db.Char(10)
+  FLE_OBS                    String?   @db.Text
+  FLE_DTHR_MARCADA           DateTime? @db.DateTime
+  FLE_MARC_EXTRA             String?   @db.Char(3)
+  FLE_DTHR_FINAL             DateTime? @db.DateTime
+  FLE_PSV_RESP               Int?
+  FLE_OBS_PSV                String?   @db.Text
+  FLE_MFL_RETORNO            String?   @db.VarChar(100)
+  FLE_DTHR_REG               DateTime? @db.DateTime
+  FLE_DTHR_CHEGADA_INICIAL   DateTime? @db.DateTime
+  FLE_PROCED                 String?   @db.Char(3)
+  FLE_COR                    String?   @db.VarChar(15)
+  FLE_BIP                    String?   @db.VarChar(30)
+  FLE_VERSAO                 String?   @db.VarChar(30)
+  FLE_USR_ATENDIMENTO        String?   @db.Char(10)
+  FLE_USR_FINAL              String?   @db.Char(10)
+  FLE_DTHR_HORA_AGUARDO      DateTime? @db.DateTime
+  FLE_OSM_SERIE              Int?      @db.SmallInt
+  FLE_OSM_NUM                Int?
+  FLE_SMM_NUM                Int?
+  FLE_LOC_COD                String?   @db.Char(3)
+  fle_preferencial           String?   @db.Char(1)
+  fle_id                     Int?
+  fle_sma_serie              Int?
+  fle_sma_num                Int?
+  fle_ind_ocupado            String?   @db.Char(1)
+  fle_psv_t_prefixo          String?   @db.VarChar(5)
+  fle_id_fila_solicitacao_rd Int?
+  fle_pac_nome               String?   @db.VarChar(255)
+  fle_retorno                String?   @db.Char(1)
+  fle_risco_queda            String?   @db.Char(1)
+  fle_vulneravel             String?   @default("N", map: "DF__FLE__fle_vulnera__20B95631") @db.Char(1)
+  fle_tolife_episode         Int?
+  fle_dthr_chegada_agm       DateTime? @db.DateTime
+  fle_atd_tipo               String?   @db.Char(1)
+  fle_atd_local              String?   @db.Char(1)
+  FLE_ID_USR                 Int?
+
+  @@id([FLE_DTHR_CHEGADA, FLE_PSV_COD, FLE_STR_COD, FLE_PAC_REG], map: "FLE_PK")
+  @@index([FLE_PAC_REG, FLE_PSV_COD, FLE_DTHR_CHEGADA], map: "fle_pac_idx")
+  @@index([FLE_PSV_COD, FLE_DTHR_ATENDIMENTO, FLE_USR_ATENDIMENTO], map: "ix_IndexName")
+}
+
 model GCC_TOKEN {
   GCC_T_GCC_COD String @db.Char(3)
   gcc_t_token   String @db.VarChar()

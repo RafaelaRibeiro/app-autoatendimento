@@ -9,4 +9,9 @@ export class WaitingListController {
   async findAll(@Param('doctor', ParseIntPipe) doctor: number) {
     return this.waitingListService.findAll(doctor);
   }
+
+  @Get(':prefix/prefix')
+  async lastBip(@Param('prefix') prefix: string) {
+    return this.waitingListService.findLastBip(prefix);
+  }
 }
