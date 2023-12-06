@@ -5,10 +5,10 @@ import { PrismaService } from 'src/shared/prisma/prisma.service';
 export class WaitingListService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(doctor: number) {
     const waitingList = await this.prisma.psv_totem.findMany({
       where: {
-        psv_t_psv_cod: 2005117002,
+        psv_t_psv_cod: doctor,
       },
       select: {
         psv_t_prefixo: true,
