@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { HelpersService } from 'src/shared/helpers/helpers.service';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
+import { addBipToWaitingListDTO } from './waiting-list.dto';
 
 @Injectable()
 export class WaitingListService {
@@ -8,6 +9,11 @@ export class WaitingListService {
     private readonly prisma: PrismaService,
     private readonly helpersService: HelpersService,
   ) {}
+
+  private PROCESS = 'TOT';
+  private USR_LOGIN = 'IUC';
+  private LIST_STATUS = 'A';
+  private REGISTER_PATIENT = 0;
 
   async findAll(doctor: number) {
     const waitingList = await this.prisma.psv_totem.findMany({
@@ -23,35 +29,51 @@ export class WaitingListService {
     return waitingList;
   }
 
-  async addNewPatient(
-    waitingList: number,
-    receptionDepartment: string,
-    prefix: string,
-  ) {
+  async addBipToWaitingList(data: addBipToWaitingListDTO) {
     try {
-      const lastBipNumber = await this.getLastBipNumber(prefix);
-      const newBipNumber = this.generateNewBipNumber(prefix, lastBipNumber);
+      const lastBipNumber = await this.getLastBipNumber(
+        data.prefix,
+        data.waitingList,
+      );
+      const newBipNumber = this.generateNewBipNumber(
+        data.prefix,
+        lastBipNumber,
+      );
       const currentDateTime = this.helpersService.getAdjustedCurrentDateTime();
-      await this.prisma.fLE.create({
+
+      console.log(data);
+      console.log(currentDateTime);
+      console.log(newBipNumber);
+      const list = await this.prisma.fLE.create({
         data: {
           FLE_DTHR_CHEGADA: currentDateTime,
           FLE_DTHR_CHEGADA_INICIAL: currentDateTime,
 
-          FLE_PSV_COD: waitingList,
-          FLE_STR_COD: receptionDepartment,
-          FLE_PAC_REG: 0,
+          FLE_PSV_COD: data.waitingList,
+          FLE_STR_COD: data.receptionDepartment,
+          FLE_PAC_REG: this.REGISTER_PATIENT,
           FLE_ORDEM: 1, //AJUSTAR
-          FLE_STATUS: 'A',
-          FLE_USR_LOGIN: 'IUC',
+          FLE_STATUS: this.LIST_STATUS,
+          FLE_USR_LOGIN: this.USR_LOGIN,
           FLE_OBS: `SENHA #${newBipNumber} (Atendimento Normal)`,
           FLE_BIP: newBipNumber,
-          FLE_PSV_RESP: waitingList,
+          FLE_PSV_RESP: data.waitingList,
           FLE_DTHR_REG: currentDateTime,
-          FLE_PROCED: 'TOT',
+          FLE_PROCED: this.PROCESS,
           fle_preferencial: 'N',
         },
+
+        select: {
+          FLE_DTHR_CHEGADA: true,
+          FLE_BIP: true,
+        },
       });
+
+      console.log(list);
+
+      return { message: 'Senha incluída com sucesso' };
     } catch (error) {
+      console.error('Erro ao salvar novo paciente:', error);
       throw new HttpException(
         'Erro ao salvar novo paciente',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -59,26 +81,28 @@ export class WaitingListService {
     }
   }
 
-  async getLastBipNumber(prefix: string) {
+  async getLastBipNumber(prefix: string, waitingList: number) {
     try {
-      const today = new Date(); // Obtém a data atual
+      const today = new Date();
 
-      today.setHours(0, 0, 0, 0); // Define a hora para 00:00:00.000
+      today.setHours(0, 0, 0, 0);
 
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
 
-      const lastBipNumber = this.prisma.fLE.count({
+      const lastBipNumber = await this.prisma.fLE.count({
         where: {
           FLE_BIP: { startsWith: prefix },
-          FLE_PROCED: 'TOT',
-          FLE_PSV_COD: 295,
+          FLE_PROCED: this.PROCESS,
+          FLE_PSV_COD: waitingList,
           FLE_DTHR_CHEGADA: {
             gte: today,
             lte: tomorrow,
           },
         },
       });
+
+      console.log(lastBipNumber);
 
       return lastBipNumber;
     } catch (error) {
@@ -90,6 +114,8 @@ export class WaitingListService {
   }
 
   generateNewBipNumber(prefix, lastBipNumber) {
-    return `${prefix}0${lastBipNumber + 1}`;
+    const newBipNumber = lastBipNumber + 1;
+    const paddedBipNumber = String(newBipNumber).padStart(3, '0');
+    return `${prefix}${paddedBipNumber}`;
   }
 }

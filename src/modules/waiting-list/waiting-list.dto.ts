@@ -1,4 +1,12 @@
-export class IncludeWaitingListDTO {
+import { IsInt, IsString } from 'class-validator';
+
+export class addBipToWaitingListDTO {
+  @IsInt()
   waitingList: number;
-  ReceptionDepartment: string;
+
+  @IsString()
+  receptionDepartment: string;
+
+  @IsString()
+  prefix: string;
 }

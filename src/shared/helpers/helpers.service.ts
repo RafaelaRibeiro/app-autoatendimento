@@ -7,4 +7,8 @@ export class HelpersService {
     now.setHours(now.getHours() - 3);
     return now;
   }
+
+  generateSeries(): string {
+    return '' + 1 + (Number(new Date().getFullYear()) % 100);
+  }
 }

@@ -7,6 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model CNT {
+  CNT_TIPO  String @db.Char(3)
+  CNT_SERIE Int    @db.SmallInt
+  CNT_NUM   Int?
+
+  @@id([CNT_TIPO, CNT_SERIE], map: "CNT_PK")
+}
+
 model FLE {
   FLE_DTHR_CHEGADA           DateTime  @db.DateTime
   FLE_PSV_COD                Int
@@ -52,6 +60,11 @@ model FLE {
   fle_atd_tipo               String?   @db.Char(1)
   fle_atd_local              String?   @db.Char(1)
   FLE_ID_USR                 Int?
+  OSM                        OSM?      @relation(fields: [oSMOSM_SERIE, oSMOSM_NUM], references: [OSM_SERIE, OSM_NUM])
+  oSMOSM_SERIE               Int?      @db.SmallInt
+  oSMOSM_NUM                 Int?
+  PAC                        PAC       @relation(fields: [FLE_PAC_REG], references: [PAC_REG], onUpdate: NoAction, map: "fle_pac_fk")
+  STR                        STR       @relation(fields: [FLE_STR_COD], references: [STR_COD], onUpdate: NoAction, map: "fle_str_fk")
 
   @@id([FLE_DTHR_CHEGADA, FLE_PSV_COD, FLE_STR_COD, FLE_PAC_REG], map: "FLE_PK")
   @@index([FLE_PAC_REG, FLE_PSV_COD, FLE_DTHR_CHEGADA], map: "fle_pac_idx")
@@ -66,6 +79,341 @@ model GCC_TOKEN {
   @@id([GCC_T_GCC_COD], map: "GCC_TOKEN_PK")
 }
 
+model OSM {
+  OSM_SERIE                      Int       @db.SmallInt
+  OSM_NUM                        Int
+  OSM_PAC                        Int
+  OSM_DTHR                       DateTime  @db.DateTime
+  OSM_CNV                        String    @db.Char(3)
+  OSM_PROC                       String    @db.Char(1)
+  OSM_MREQ                       Int
+  OSM_STR                        String    @db.Char(3)
+  OSM_STATUS                     String?   @db.Char(1)
+  OSM_IND_URG                    String    @db.Char(1)
+  OSM_HSP_NUM                    Int?      @db.SmallInt
+  OSM_TIPO                       String?   @db.Char(1)
+  OSM_DT_RESULT                  DateTime  @db.DateTime
+  OSM_ATEND                      String?   @db.Char(3)
+  OSM_OBS_COLETA                 String?   @db.VarChar(100)
+  OSM_LTA_COD                    String?   @db.Char(8)
+  OSM_CTLE_CNV                   String?   @db.VarChar(30)
+  OSM_NOTA_SALA                  String?   @db.Char(1)
+  OSM_CID_COD                    String?   @db.Char(8)
+  OSM_OBS                        String?   @db.VarChar(255)
+  OSM_MCNV                       String?   @db.Char(30)
+  OSM_PADRAO_PRECO               Int?
+  OSM_DT_SOLIC                   DateTime? @db.DateTime
+  OSM_HORA_ESP                   String?   @db.Char(1)
+  OSM_SUS_GRUPO_ATENDE           String?   @db.Char(4)
+  OSM_SUS_TIPO_ATENDE            String?   @db.Char(4)
+  OSM_CNPJ_SOLIC                 String?   @db.Char(16)
+  OSM_SAP_COD                    Int?
+  OSM_LIB_PAG                    String?   @db.Char(1)
+  OSM_LIB_PAG_DTHR               DateTime? @db.DateTime
+  OSM_LIB_PAG_USR                String?   @db.Char(10)
+  OSM_MTE_SERIE_BENEF            Int?
+  OSM_MTE_SEQ_BENEF              Int?
+  OSM_OSM_SERIE_BENEF            Int?      @db.SmallInt
+  OSM_OSM_NUM_BENEF              Int?
+  OSM_LIB_PAG_SERIE              Int?
+  OSM_LIB_PAG_NUM                Int?
+  OSM_ASO_MES_REF                String?   @db.Char(6)
+  OSM_NUM_EXTERNO                Int?
+  OSM_CML_CNV_COD                String?   @db.Char(3)
+  OSM_LEG_COD                    String?   @db.Char(5)
+  OSM_CML_CONV_COD               String?   @db.Char(4)
+  OSM_CML_CONV_NOME              String?   @db.Char(20)
+  OSM_LIB_PAG_NFL_SERIE          String?   @db.VarChar(5)
+  OSM_LIB_PAG_NFL_NUM            Int?
+  OSM_IND_COLETA_DOM             String?   @db.Char(1)
+  OSM_MREQ_IND_SLINE             String?   @db.Char(1)
+  OSM_USR_LOGIN_CAD              String?   @db.Char(10)
+  OSM_MREQ_2                     Int?
+  OSM_MREQ_3                     Int?
+  OSM_DT_SOLIC_2                 DateTime? @db.DateTime
+  OSM_DT_SOLIC_3                 DateTime? @db.DateTime
+  OSM_NOTA_SALA_COBRANCA_MAT     String?   @db.Char(1)
+  OSM_MCNV_PROTOCOLO             Decimal?  @db.Decimal(10, 0)
+  OSM_TIPO_ACIDENTE              Int?
+  OSM_TIPO_DOENCA                String?   @db.Char(1)
+  OSM_TEMPO_DOENCA               Int?
+  OSM_ESCALA_DOENCA              String?   @db.Char(1)
+  OSM_TISS_TIPO_SAIDA            String?   @db.Char(2)
+  OSM_TISS_INDIC_CLINICA         String?   @db.VarChar(500)
+  OSM_TISS_TIPO_ATENDE           String?   @db.Char(2)
+  OSM_SUS_IDADE                  Int?
+  OSM_SUS_SEXO                   String?   @db.Char(1)
+  OSM_DTHR_SAIDA                 DateTime? @db.DateTime
+  OSM_EMPNOME_SOLIC              String?   @db.VarChar(100)
+  OSM_TISS_GUIA_PRINCIPAL        String?   @db.VarChar(30)
+  OSM_CNES_SOLIC                 String?   @db.VarChar(20)
+  OSM_W_LOGIN                    String?   @db.VarChar(50)
+  OSM_W_SENHA                    String?   @db.VarChar(20)
+  OSM_NUM_EXTERNO_ALFA           String?   @db.VarChar(30)
+  OSM_PLN_COD                    String?   @db.Char(3)
+  OSM_OBS_TISS                   String?   @db.VarChar(255)
+  OSM_PSV_INDIC                  Int?
+  OSM_IMP_ETIQ                   String?   @db.Text
+  OSM_IND_WEB                    String?   @db.Char(1)
+  OSM_PAC_ETIQUETA_CIP_LSF       String?   @db.Char(10)
+  OSM_ETIQUETA_CIP_LSF           String?   @db.Char(10)
+  OSM_TIPO_AUDIT                 String?   @db.Char(1)
+  OSM_PLANSERV_RAT_EMPRESA       String?   @db.VarChar(14)
+  osm_cod_cebim                  String?   @db.VarChar(100)
+  osm_email_result               String?   @db.VarChar(100)
+  osm_cr_cor                     String?   @db.Char(10)
+  osm_planserv_bm_mot_tipo       String?   @db.Char(3)
+  osm_planserv_bm_mot_cod        String?   @db.Char(5)
+  osm_obs_extenso                String?   @db.Text
+  osm_trak_passagem              String?   @db.VarChar(100)
+  osm_id_alvaro                  String?   @db.VarChar(30)
+  osm_obs_pend_b2b               String?   @db.VarChar(100)
+  osm_ind_vacina                 String?   @db.Char(1)
+  osm_lib_pag_prt                String?   @db.Char(1)
+  osm_tiss_guia_operadora        String?   @db.VarChar(30)
+  osm_planserv_rat_dt_emis       DateTime? @db.DateTime
+  osm_dthr_biometria_unimed      DateTime? @db.DateTime
+  osm_resultado_biometria_unimed String?   @db.VarChar(10)
+  OSM_IND_ANTECIPADA             String?   @db.Char(1)
+  osm_ori_sol                    String?   @db.Char(1)
+  osm_click_protocolo            String?   @db.VarChar(30)
+  osm_click_requisicao           String?   @db.VarChar(100)
+  osm_click_ind_integracao       String?   @db.VarChar(20)
+  osm_dthr_exp                   DateTime? @db.DateTime
+  osm_orp_num                    Int?
+  osm_sus_ind_prog_transp        String?   @db.Char(1)
+  OSM_COD_CEBIM_2                String?   @db.VarChar(100)
+  OSM_COD_CEBIM_3                String?   @db.VarChar(100)
+  osm_mcnv_protocolo_v2          String?   @db.VarChar(20)
+  osm_token                      String?   @db.VarChar(255)
+  osm_cod_justificativa          Int?
+  osm_status_confirmacao         String?   @db.VarChar(25)
+  osm_id_integra                 String?   @db.VarChar(100)
+  osm_tp_ident_benef             String?   @db.Char(2)
+  osm_utc                        String?   @db.VarChar(20)
+  osm_ind_verao                  String?   @db.Char(1)
+  osm_regime_atend               String?   @db.Char(3)
+  osm_saude_ocup                 String?   @db.Char(3)
+  osm_cobertura_esp              String?   @db.Char(3)
+
+  PAC PAC @relation(fields: [OSM_PAC], references: [PAC_REG], onUpdate: NoAction, map: "osm_pac_fk")
+
+  STR STR   @relation(fields: [OSM_STR], references: [STR_COD], onUpdate: NoAction, map: "osm_str_fk")
+  FLE FLE[]
+
+  @@id([OSM_SERIE, OSM_NUM], map: "OSM_PK")
+  @@index([OSM_CML_CNV_COD], map: "osm_cnv_cml_idx")
+  @@index([OSM_CNV, OSM_DTHR], map: "osm_cnv_dthr_idx")
+  @@index([OSM_CTLE_CNV], map: "osm_ctle_idx")
+  @@index([OSM_DT_RESULT], map: "osm_dt_result_idx")
+  @@index([OSM_DTHR], map: "osm_dthr_idx")
+  @@index([OSM_LIB_PAG_DTHR], map: "osm_lib_pag_dthr_idx")
+  @@index([OSM_LIB_PAG_NFL_SERIE, OSM_LIB_PAG_NFL_NUM], map: "osm_nfl_idx")
+  @@index([OSM_NUM_EXTERNO_ALFA], map: "osm_num_ext_idx")
+  @@index([OSM_PAC, OSM_DTHR], map: "osm_pac_idx")
+  @@index([OSM_SAP_COD], map: "osm_sap_idx")
+  @@index([OSM_STR, OSM_DTHR], map: "osm_str_idx")
+  @@index([OSM_W_LOGIN, OSM_W_SENHA], map: "osm_w_login_idx")
+  @@index([OSM_PAC, OSM_HSP_NUM], map: "ix_IndexName")
+}
+
+model PAC {
+  PAC_REG                     Int       @id(map: "PAC_PK")
+  PAC_DREG                    DateTime  @db.DateTime
+  PAC_PRONT                   Int?
+  PAC_NOME                    String    @db.Char(50)
+  PAC_SEXO                    String    @db.Char(1)
+  PAC_NASC                    DateTime? @db.DateTime
+  PAC_FONE                    String?   @db.Char(14)
+  PAC_CNV                     String    @db.Char(3)
+  PAC_MCNV                    String?   @db.VarChar(30)
+  PAC_TIT                     String?   @db.Char(40)
+  PAC_PESO                    Decimal?  @db.Decimal(6, 3)
+  PAC_ALT                     Decimal?  @db.Decimal(4, 2)
+  PAC_DULT                    DateTime? @db.DateTime
+  PAC_FALTA                   Int?      @db.SmallInt
+  PAC_END                     String?   @db.Char(40)
+  PAC_COMP                    String?   @db.Char(40)
+  PAC_CEP                     String?   @db.Char(9)
+  PAC_CID                     String?   @db.VarChar(30)
+  PAC_UF                      String?   @db.Char(2)
+  PAC_CNV_COD                 String?   @db.Char(3)
+  PAC_PLN_COD                 String?   @db.Char(3)
+  PAC_DT_ULT_FALTA            DateTime? @db.DateTime
+  PAC_EST_CIVIL               String?   @db.Char(1)
+  PAC_NOME_MAE                String?   @db.VarChar(40)
+  PAC_ABORH                   String?   @db.Char(3)
+  PAC_PAC_REG                 Int?
+  PAC_LOTACAO                 String?   @db.Char(8)
+  PAC_DTCNV_PAG               DateTime? @db.DateTime
+  PAC_DTCNV_VAL               DateTime? @db.DateTime
+  PAC_COD_DEPCNV              String?   @db.Char(2)
+  PAC_CNV2                    String?   @db.Char(3)
+  PAC_MCNV2                   String?   @db.VarChar(30)
+  PAC_CNV2_COD                String?   @db.Char(3)
+  PAC_PLN2_COD                String?   @db.Char(3)
+  PAC_PRO_COD                 Decimal?  @db.Decimal(6, 0)
+  PAC_NUMRG                   String?   @db.Char(15)
+  PAC_NUMCPF                  String?   @db.Char(12)
+  PAC_COD_FON                 String?   @db.Char(15)
+  PAC_DT_VALID                DateTime? @db.DateTime
+  PAC_VALID                   String?   @db.Char(15)
+  PAC_CDE_COD                 Decimal?  @db.Decimal(6, 0)
+  PAC_FONE2                   String?   @db.Char(14)
+  PAC_RAMAL                   String?   @db.Char(5)
+  PAC_MEDICO                  Int?
+  PAC_DIAG_CID                String?   @db.Char(8)
+  PAC_DIAG_TPCID              String?   @db.Char(1)
+  PAC_PESSOA                  String?   @db.Char(1)
+  PAC_PRONT_STATUS            String?   @db.Char(1)
+  PAC_TIT2                    String?   @db.VarChar(40)
+  PAC_LTA_COD                 String?   @db.Char(8)
+  PAC_MATR_EMP                String?   @db.VarChar(20)
+  PAC_PRO_COD_OCUP            Decimal?  @db.Decimal(6, 0)
+  PAC_NUMRG_ORG               String?   @db.Char(5)
+  PAC_NUMRG_UF                String?   @db.Char(2)
+  PAC_END_NUM                 Decimal?  @db.Decimal(10, 0)
+  PAC_ZONA                    String?   @db.Char(1)
+  PAC_EMAIL                   String?   @db.VarChar(100)
+  PAC_USR_LOGIN_CAD           String?   @db.Char(10)
+  PAC_COD_FON_B               String?   @db.VarChar(15)
+  PAC_PRONT_LOC               String?   @db.Char(3)
+  PAC_CLE_COD                 String?   @db.Char(3)
+  PAC_DT_OBITO                DateTime? @db.DateTime
+  PAC_TRAT                    String?   @db.VarChar(10)
+  PAC_CELULAR                 String?   @db.VarChar(14)
+  PAC_GFC_NUM                 Int?
+  PAC_CCE_NUM                 Int?
+  PAC_SO_CRIT_CONV            String?   @db.Char(3)
+  PAC_SO_DT_ADM               DateTime? @db.DateTime
+  PAC_SO_DT_INI_FUNC          DateTime? @db.DateTime
+  PAC_SO_MES_PER              Decimal?  @db.Decimal(2, 0)
+  PAC_SO_CNV_COD              String?   @db.Char(3)
+  PAC_SO_STATUS               String?   @db.Char(1)
+  PAC_DT_VALID2               DateTime? @db.DateTime
+  PAC_CIMP_PRIORIDADE         Decimal?  @db.Decimal(2, 0)
+  PAC_REG_EXTERNO1            Int?
+  PAC_REG_EXTERNO2            Int?
+  PAC_REG_EXTERNO3            Int?
+  PAC_PRONT_EXTERNO           Int?
+  PAC_CTPS                    String?   @db.VarChar(20)
+  PAC_NIT                     String?   @db.VarChar(20)
+  PAC_REG_EXTERNO4            Int?
+  PAC_W_LOGIN                 String?   @db.VarChar(30)
+  PAC_W_SENHA                 String?   @db.VarChar(30)
+  PAC_COD_DEPCNV2             String?   @db.Char(2)
+  PAC_MATR_EMP2               String?   @db.VarChar(20)
+  PAC_CONTATO_DIA             String?   @db.VarChar(7)
+  PAC_CONTATO_TURNO           String?   @db.VarChar(2)
+  PAC_CONTATO_OBS             String?   @db.VarChar(100)
+  PAC_SO_STATUS_MOTIVO        String?   @db.VarChar(30)
+  PAC_OBS                     String?   @db.VarChar(255)
+  PAC_PRONT_DTHR              DateTime? @db.DateTime
+  PAC_PRONT_USR_LOGIN         String?   @db.Char(10)
+  PAC_PRONT_IND_GERA          String?   @db.Char(1)
+  PAC_SO_BRPDH                String?   @db.VarChar(20)
+  PAC_OBS2                    String?   @db.VarChar(255)
+  PAC_CARTAO_SUS              String?   @db.VarChar(20)
+  PAC_NUMRG_DTEXP             DateTime? @db.DateTime
+  PAC_ALERTA                  String?   @db.VarChar(255)
+  PAC_ALERTA_USR_LOGIN        String?   @db.Char(10)
+  PAC_ALERTA_DTHR             DateTime? @db.DateTime
+  PAC_IMG_COD_FOTO            Decimal?  @db.Decimal(8, 0)
+  PAC_SUS_SISCEL              String?   @db.VarChar(20)
+  PAC_CNES_ORIGEM             String?   @db.VarChar(30)
+  PAC_OCUP_VINC               String?   @db.Char(3)
+  PAC_LGR_COD                 Int?
+  PAC_COMP_EXTRA              String?   @db.VarChar(255)
+  PAC_LTA_COD2                String?   @db.Char(8)
+  PAC_QUIMIO_PRESC_ACESSO     String?   @db.VarChar(50)
+  PAC_IND_SIGILOSO            String?   @db.Char(1)
+  PAC_IND_CPF_PROPRIO         String?   @db.Char(1)
+  PAC_IND_ACEITA_SMS          String?   @db.Char(1)
+  PAC_BLANK_CPF_JUSTIFIC      String?   @db.VarChar(255)
+  PAC_CARTAO_MAGNETICO        String?   @db.Char(255)
+  PAC_CARTAO_MAGNETICO_DTHR   DateTime? @db.DateTime
+  PAC_CARGO                   String?   @db.VarChar(150)
+  PAC_CNV_CARTAO_TRILHA1      String?   @db.VarChar(150)
+  PAC_CNV_CARTAO_TRILHA2      String?   @db.VarChar(150)
+  PAC_CTPS_SERIE              String?   @db.VarChar(10)
+  PAC_CTPS_UF                 String?   @db.Char(2)
+  PAC_CTPS_DT_EMISSAO         DateTime? @db.DateTime
+  PAC_END_CEP_TIT             String?   @db.Char(3)
+  PAC_ALT_UNID                String?   @db.VarChar(5)
+  PAC_PESO_UNID               String?   @db.VarChar(5)
+  PAC_REG_STR_COD             String?   @db.Char(3)
+  pac_ind_cns_proprio         String?   @db.Char(1)
+  pac_ind_vip                 String?   @db.Char(1)
+  pac_num_dnv                 String?   @db.VarChar(30)
+  pac_bloq_fms                String?   @db.VarChar(1)
+  pac_dayh_freq_escola        String?   @db.Char(1)
+  pac_dayh_renda_familiar     String?   @db.Char(1)
+  pac_id_anom                 Int?
+  pac_cep_ind_generico        String?   @db.Char(1)
+  pac_cnv_cartao_trilha_unica String?   @db.VarChar(255)
+  pac_ind_whatsapp            String?   @db.Char(1)
+  pac_mcnv_antiga             String?   @db.VarChar(30)
+  pac_nome_social             String?   @db.VarChar(100)
+  pac_flag_social             String?   @db.VarChar(1)
+  pac_dthr_social             DateTime? @db.DateTime
+  pac_reg_xclinic             Int?
+  pac_categ                   String?   @db.VarChar(10)
+  pac_insc_est                String?   @db.VarChar(20)
+  pac_prod_rural              String?   @db.Char(1)
+  pac_reg_korus               Int?
+  pac_dthr_clariped           DateTime? @db.DateTime
+  pac_ind_aceite_termo        String?   @db.Char(1)
+  pac_token_hash              String?   @db.VarChar(32)
+  pac_token_hora              DateTime? @db.DateTime
+  pac_exporta_resultado_aso   String?   @db.Char(1)
+  pac_vin_c_cod               String?   @db.Char(2)
+  pac_vin_t_cod               String?   @db.Char(2)
+  pac_vin_s_cod               String?   @db.Char(2)
+  pac_carga_hor               Int?
+  pac_dthr_obito              DateTime? @db.DateTime
+  pac_obs_obito               String?   @db.VarChar(Max)
+  pac_las_id                  Int?
+  pac_versao_dt_hr            DateTime? @db.DateTime
+  pac_unid_peso               String?   @db.VarChar(10)
+  pac_conver_altura           String?   @db.VarChar(10)
+  pac_conver_peso             String?   @db.VarChar(10)
+  pac_utc                     String?   @db.VarChar(20)
+  pac_ind_verao               String?   @db.Char(1)
+  pac_dthr_obito_utc          String?   @db.VarChar(20)
+  pac_local_trab              String?   @db.VarChar(30)
+  pac_cripto                  String?   @db.Char(1)
+  pac_rg_complemento          String?   @db.VarChar(255)
+  pac_mae_cod_fon             String?   @db.Char(15)
+  pac_flag_mae_desconhecida   String?   @db.Char(1)
+  pac_pai_end                 String?   @db.Char(4)
+
+  PAC PAC? @relation("PACToPAC", fields: [PAC_PAC_REG], references: [PAC_REG], onDelete: NoAction, onUpdate: NoAction, map: "pac_pac_fk")
+
+  OSM       OSM[]
+  FLE       FLE[]
+  other_PAC PAC[] @relation("PACToPAC")
+  STR       STR?  @relation(fields: [PAC_REG_STR_COD], references: [STR_COD], onDelete: NoAction, onUpdate: NoAction, map: "pac_reg_str_fk")
+
+  @@index([PAC_PAC_REG], map: "ix_IndexName")
+  @@index([PAC_CARTAO_SUS], map: "pac_cns_idx")
+  @@index([PAC_CNV2], map: "pac_cnv2_idx")
+  @@index([PAC_CNV, PAC_LTA_COD, PAC_GFC_NUM], map: "pac_cnv_idx")
+  @@index([PAC_COD_FON_B], map: "pac_cod_fon_b_idx")
+  @@index([PAC_COD_FON], map: "pac_cod_fon_idx")
+  @@index([PAC_NUMCPF], map: "pac_cpf_idx")
+  @@index([PAC_MCNV], map: "pac_mcnv_idx")
+  @@index([PAC_NIT], map: "pac_nit_idx")
+  @@index([PAC_NOME], map: "pac_nome_idx")
+  @@index([PAC_PRONT_EXTERNO], map: "pac_pront_externo_idx")
+  @@index([PAC_PRONT], map: "pac_pront_idx")
+  @@index([PAC_REG_EXTERNO1], map: "pac_reg_externo1_ix")
+  @@index([PAC_REG_EXTERNO2], map: "pac_reg_externo2_ix")
+  @@index([PAC_REG_EXTERNO3], map: "pac_reg_externo3_ix")
+  @@index([pac_reg_korus], map: "pac_reg_korus_idx")
+  @@index([PAC_NUMRG], map: "pac_rg_ix")
+  @@index([PAC_SO_CNV_COD, PAC_LTA_COD, PAC_GFC_NUM], map: "pac_so_cnv_idx")
+}
+
 model psv_totem {
   psv_t_psv_cod        Int
   psv_t_prefixo        String    @db.VarChar(5)
@@ -78,4 +426,139 @@ model psv_totem {
   psv_t_dthr_alteracao DateTime? @db.DateTime
 
   @@id([psv_t_psv_cod, psv_t_prefixo], map: "psv_totem_pk")
+}
+
+model STR {
+  STR_COD                     String   @id(map: "STR_PK") @db.Char(3)
+  STR_NOME                    String   @db.Char(40)
+  STR_RESP                    Int
+  STR_CC                      String   @db.Char(5)
+  STR_PSV_DEF                 Int?
+  STR_TIPO                    String   @db.Char(1)
+  STR_STR_COD                 String?  @db.Char(3)
+  STR_CATEG                   String?  @db.Char(1)
+  STR_CODORG                  String?  @db.VarChar(10)
+  STR_STATUS                  String   @db.Char(1)
+  STR_EMP_COD                 Int?
+  STR_PADRAO_PRECO            Decimal? @db.Decimal(1, 0)
+  STR_IND_COORD               String?  @db.Char(1)
+  STR_STR_COORD               String?  @db.Char(3)
+  STR_SERIE_PRONT             Int?     @db.SmallInt
+  STR_SMA_GERA_OS             String?  @db.Char(1)
+  STR_PROD_AUX                String   @db.Char(1)
+  STR_STATUS_OBS              String?  @db.VarChar(100)
+  STR_TIPO_ATENDE             String   @db.Char(1)
+  STR_CCR_COD_RECEP           String?  @db.Char(5)
+  STR_SOLIC_BAIXA             String?  @db.Char(1)
+  STR_CML_CNV_COD             String?  @db.Char(3)
+  STR_GEAP_LOCAL_ATEND        String?  @db.Char(2)
+  STR_ENFERM_ID               String?  @db.Char(10)
+  STR_CCT_COD_RECEITA         Decimal? @db.Decimal(6, 0)
+  STR_COD_FILIAL_MICROSIGA    String?  @db.VarChar(10)
+  STR_CML_PERC_VALOR          Decimal? @db.Decimal(10, 4)
+  STR_IMG_COD                 Decimal? @db.Decimal(8, 0)
+  STR_IND_TAM_MULT            String?  @db.Char(1)
+  STR_DZSET_CODIGO            String?  @db.Char(10)
+  STR_DZSET_ESP               String?  @db.Char(5)
+  STR_EMS_COD_ESTAB           Decimal? @db.Decimal(2, 0)
+  STR_PLANO_CENTRO_CUSTO      String?  @db.VarChar(8)
+  STR_DICOM_STATION_AETITLE   String?  @db.VarChar(40)
+  STR_UNIMED_SOL_CATEG        String?  @db.VarChar(40)
+  STR_UNIMED_SOL_CATEG_COD    String?  @db.VarChar(10)
+  STR_CAMPOS_CTL_BLOQ         String?  @db.VarChar(255)
+  STR_HSR_COD_1               Int?
+  STR_HSR_COD_2               Int?
+  STR_HSR_COD_3               Int?
+  STR_HSR_COD_4               Int?
+  STR_HSR_COD_5               Int?
+  STR_HSR_COD_6               Int?
+  STR_SIGLA                   String?  @db.VarChar(10)
+  STR_IND_ALOC                String   @default("D", map: "DF__STR__STR_IND_ALO__46DD686B") @db.Char(1)
+  STR_COD_ESTRUT              String?  @db.VarChar(30)
+  STR_IND_RATEIO              String   @default("S", map: "DF__STR__STR_IND_RAT__47D18CA4") @db.Char(1)
+  STR_CCIH_MONITOR            String   @default("S", map: "DF__STR__STR_CCIH_MO__48C5B0DD") @db.Char(1)
+  STR_CCIH_SIGLA              String?  @db.VarChar(30)
+  STR_SUS_RPA_NOME            String?  @db.VarChar(100)
+  STR_EPE_COD                 Int?
+  STR_OUTROS_UNID_PROD        String?  @db.VarChar(60)
+  STR_IND_EXPORTA_CIH         String   @default("S", map: "DF__STR__STR_IND_EXP__49B9D516") @db.Char(1)
+  STR_IND_PACOTE_ABERTO       String   @default("N", map: "DF__STR__STR_IND_PAC__4AADF94F") @db.Char(1)
+  STR_EMS_UNID_NEGOCIO        String?  @db.VarChar(10)
+  STR_EMS_PORTADOR            String?  @db.VarChar(10)
+  STR_PEX_PED_INT             String?  @db.Char(1)
+  STR_SERIE_NF                String?  @db.VarChar(5)
+  STR_B2B_IND_ATUALIZA_ITEM   String?  @default("N", map: "DF__STR__STR_B2B_IND__4BA21D88") @db.Char(1)
+  STR_IND_WEBLAUDOS           String   @default("S", map: "DF__STR__STR_IND_WEB__4C9641C1") @db.Char(1)
+  STR_IND_B2B_SEPARA          String   @default("N", map: "DF__STR__STR_IND_B2B__4D8A65FA") @db.Char(1)
+  STR_IMPORTA_ORP             String   @default("N", map: "DF__STR__STR_IMPORTA__4E7E8A33") @db.Char(1)
+  str_laudo_email             String?  @db.VarChar(255)
+  str_rn_str_cod              String?  @db.Char(3)
+  str_ind_laudo_bloco         String?  @db.Char(1)
+  str_sus_rpa_folha_ini       Int?
+  str_ind_b2b_urg             String?  @db.Char(1)
+  str_ind_psc_proc_gera_os    String   @default("S", map: "DF__STR__str_ind_psc__19B68790") @db.Char(1)
+  str_ind_bloq_lib_auto       String?  @db.Char(1)
+  str_ind_apl_os_bxa          String?  @db.Char(1)
+  str_rota_str_cod            String?  @db.Char(3)
+  str_ordem_exp               Int?
+  str_dia_semana_exp          String?  @db.Char(1)
+  str_unbh_locat              String?  @db.VarChar(30)
+  str_fle_coleta              Int?
+  str_rot_cod                 String?  @db.Char(5)
+  str_cod_externo             String?  @db.VarChar(100)
+  str_unbh_loc_uso            String?  @db.VarChar(10)
+  str_trak_sba_solic          String?  @db.Char(6)
+  STR_ATEND                   String?  @db.Char(3)
+  str_palm_id                 Int?
+  str_ind_unid_aberta         String?  @db.Char(1)
+  str_tp_unidade              String?  @db.VarChar(3)
+  str_fle_vacina              Int?
+  str_uti12_psv_default       Int?
+  str_exp_nefro_padrao        String?  @db.VarChar(1)
+  str_ind_disp_vaga           String   @default("S", map: "DF__STR__str_ind_dis__6BC59FAE") @db.Char(1)
+  str_cod_unidade             String?  @db.Char(3)
+  str_duplic_str_cod          String?  @db.Char(3)
+  str_longitude               String?  @db.VarChar(32)
+  str_latitude                String?  @db.VarChar(32)
+  str_tam_ind_apraza          String?  @db.Char(1)
+  str_tab_cod                 String?  @db.Char(3)
+  str_ind_vacina              String?  @default("N", map: "DF__STR__str_ind_vac__2CF4448D") @db.Char(1)
+  str_ind_coleta_dom          String?  @default("N", map: "DF__STR__str_ind_col__2DE868C6") @db.Char(1)
+  str_ind_mostrar_rede        String?  @db.VarChar(1)
+  str_qst_cod                 Decimal? @db.Decimal(6, 0)
+  str_bloqueia_com_ws         String   @default("N", map: "DF__STR__str_bloquei__37FBE2E5") @db.Char(1)
+  str_b2b_ind_result_lib      String?  @db.Char(1)
+  str_pront_str_cod           String?  @db.Char(3)
+  str_emp_matriz_labet        Int?
+  str_ind_appfilaespera       String?  @db.Char(1)
+  str_b2b_ind_contador        String?  @db.Char(1)
+  str_ind_arquivo             String?  @db.Char(1)
+  str_aux_def                 Int?
+  str_solic_sba_destino       String?  @db.Char(6)
+  str_b2b_st_def              String?  @db.VarChar(1)
+  str_local_utilizacao_ipasgo String?  @db.Char(1)
+  str_ind_exp_nome_social     String?  @db.Char(1)
+  str_est_dem_mensal          Int?
+  str_imp_metodo              String?  @db.Char(1)
+  STR_IND_LIB_AUTO            String?  @db.Char(1)
+  str_acesso_api              String?  @db.VarChar(50)
+
+  STR_STRToSTR_str_duplic_str_cod STR? @relation("STRToSTR_str_duplic_str_cod", fields: [str_duplic_str_cod], references: [STR_COD], onDelete: NoAction, onUpdate: NoAction, map: "str_duplic_fk")
+
+  STR_STRToSTR_str_rn_str_cod STR? @relation("STRToSTR_str_rn_str_cod", fields: [str_rn_str_cod], references: [STR_COD], onDelete: NoAction, onUpdate: NoAction, map: "str_rn_str_fk")
+
+  STR_STRToSTR_str_rota_str_cod STR? @relation("STRToSTR_str_rota_str_cod", fields: [str_rota_str_cod], references: [STR_COD], onDelete: NoAction, onUpdate: NoAction, map: "str_rota_fk")
+  STR_STRToSTR_STR_STR_COD      STR? @relation("STRToSTR_STR_STR_COD", fields: [STR_STR_COD], references: [STR_COD], onDelete: NoAction, onUpdate: NoAction, map: "str_str_fk")
+
+  OSM OSM[]
+  PAC PAC[]
+
+  other_STR_STRToSTR_str_duplic_str_cod STR[] @relation("STRToSTR_str_duplic_str_cod")
+  other_STR_STRToSTR_str_rn_str_cod     STR[] @relation("STRToSTR_str_rn_str_cod")
+  other_STR_STRToSTR_str_rota_str_cod   STR[] @relation("STRToSTR_str_rota_str_cod")
+  other_STR_STRToSTR_STR_STR_COD        STR[] @relation("STRToSTR_STR_STR_COD")
+  FLE                                   FLE[]
+
+  @@index([STR_NOME, STR_COD], map: "str_nome")
+  @@index([STR_TIPO], map: "STR_TIPO_IDX")
 }

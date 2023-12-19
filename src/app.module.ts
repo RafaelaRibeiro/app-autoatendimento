@@ -5,9 +5,19 @@ import { WaitingListModule } from './modules/waiting-list/waiting-list.module';
 import { ApiKeyMiddleware } from './shared/middleware/api-key.middleware';
 import { PrismaService } from './shared/prisma/prisma.service';
 import { HelpersService } from './shared/helpers/helpers.service';
+import { ServiceOrdersModule } from './modules/service-orders/service-orders.module';
+import { PatientsModule } from './modules/patients/patients.module';
+import { CountersModule } from './modules/counters/counters.module';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
-  imports: [WaitingListModule],
+  imports: [
+    WaitingListModule,
+    ServiceOrdersModule,
+    PatientsModule,
+    CountersModule,
+    LoggerModule.forRoot(),
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService, HelpersService],
 })
