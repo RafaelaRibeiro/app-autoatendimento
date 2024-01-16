@@ -9,6 +9,7 @@ import { ServiceOrdersModule } from './modules/service-orders/service-orders.mod
 import { PatientsModule } from './modules/patients/patients.module';
 import { CountersModule } from './modules/counters/counters.module';
 import { LoggerModule } from 'nestjs-pino';
+import { PricingtableModule } from './modules/pricingtable/pricingtable.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { LoggerModule } from 'nestjs-pino';
     PatientsModule,
     CountersModule,
     LoggerModule.forRoot(),
+    PricingtableModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, HelpersService],

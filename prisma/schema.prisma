@@ -15,6 +15,40 @@ model CNT {
   @@id([CNT_TIPO, CNT_SERIE], map: "CNT_PK")
 }
 
+model CTF {
+  CTF_TIPO               String   @db.Char(1)
+  CTF_COD                String   @db.Char(5)
+  CTF_NOME               String   @db.Char(40)
+  CTF_CFO_COD            String?  @db.Char(5)
+  CTF_CTF_TIPO           String?  @db.Char(1)
+  CTF_CTF_COD            String?  @db.Char(5)
+  CTF_CATEG              String?  @db.Char(2)
+  CTF_IND_MED            String?  @db.Char(1)
+  CTF_CCT_COD1           Decimal? @db.Decimal(6, 0)
+  CTF_CCT_COD2           Decimal? @db.Decimal(6, 0)
+  CTF_GOLDEN             String?  @db.Char(2)
+  CTF_ORDEM              Decimal? @db.Decimal(6, 0)
+  CTF_ESP_COD            String?  @db.Char(3)
+  CTF_TP_MAT_PLANSERV    String?  @db.Char(1)
+  CTF_GEAP_LOCAL_ATEND   String?  @db.Char(2)
+  CTF_IND_GASES          String?  @db.Char(1)
+  CTF_IND_RHP_REP_BASE   String?  @db.Char(1)
+  CTF_LIMITE_EXEC_DIA    Int?
+  CTF_TITULO_AGENDA_OCUP String?  @db.Char(40)
+  ctf_ordem_marc         Int?
+  ctf_del_logica         String   @default("N", map: "DF__CTF__ctf_del_log__629B5CD0") @db.Char(1)
+  ctf_ind_lab            String   @default("N", map: "DF__CTF__ctf_ind_lab__22C0CEDD") @db.Char(1)
+  ctf_ind_rateio_pacs    String?  @db.Char(1)
+
+  CTF CTF? @relation("CTFToCTF", fields: [CTF_CTF_TIPO, CTF_CTF_COD], references: [CTF_TIPO, CTF_COD], onDelete: NoAction, onUpdate: NoAction, map: "ctf_ctf_fk")
+
+  other_CTF CTF[] @relation("CTFToCTF")
+
+  SMK SMK[]
+
+  @@id([CTF_TIPO, CTF_COD], map: "CTF_PK")
+}
+
 model FLE {
   FLE_DTHR_CHEGADA           DateTime  @db.DateTime
   FLE_PSV_COD                Int
@@ -65,6 +99,10 @@ model FLE {
   oSMOSM_NUM                 Int?
   PAC                        PAC       @relation(fields: [FLE_PAC_REG], references: [PAC_REG], onUpdate: NoAction, map: "fle_pac_fk")
   STR                        STR       @relation(fields: [FLE_STR_COD], references: [STR_COD], onUpdate: NoAction, map: "fle_str_fk")
+  SMM                        SMM?      @relation(fields: [sMMSMM_OSM_SERIE, sMMSMM_OSM, sMMSMM_NUM], references: [SMM_OSM_SERIE, SMM_OSM, SMM_NUM])
+  sMMSMM_OSM_SERIE           Int?      @db.SmallInt
+  sMMSMM_OSM                 Int?
+  sMMSMM_NUM                 Int?
 
   @@id([FLE_DTHR_CHEGADA, FLE_PSV_COD, FLE_STR_COD, FLE_PAC_REG], map: "FLE_PK")
   @@index([FLE_PAC_REG, FLE_PSV_COD, FLE_DTHR_CHEGADA], map: "fle_pac_idx")
@@ -200,6 +238,7 @@ model OSM {
 
   STR STR   @relation(fields: [OSM_STR], references: [STR_COD], onUpdate: NoAction, map: "osm_str_fk")
   FLE FLE[]
+  SMM SMM[]
 
   @@id([OSM_SERIE, OSM_NUM], map: "OSM_PK")
   @@index([OSM_CML_CNV_COD], map: "osm_cnv_cml_idx")
@@ -389,10 +428,14 @@ model PAC {
 
   PAC PAC? @relation("PACToPAC", fields: [PAC_PAC_REG], references: [PAC_REG], onDelete: NoAction, onUpdate: NoAction, map: "pac_pac_fk")
 
-  OSM       OSM[]
-  FLE       FLE[]
-  other_PAC PAC[] @relation("PACToPAC")
-  STR       STR?  @relation(fields: [PAC_REG_STR_COD], references: [STR_COD], onDelete: NoAction, onUpdate: NoAction, map: "pac_reg_str_fk")
+  OSM        OSM[]
+  FLE        FLE[]
+  other_PAC  PAC[] @relation("PACToPAC")
+  STR        STR?  @relation(fields: [PAC_REG_STR_COD], references: [STR_COD], onDelete: NoAction, onUpdate: NoAction, map: "pac_reg_str_fk")
+  PSV        PSV?  @relation(fields: [pSVPSV_COD], references: [PSV_COD])
+  pSVPSV_COD Int?
+  RCL        RCL[]
+  SMM        SMM[]
 
   @@index([PAC_PAC_REG], map: "ix_IndexName")
   @@index([PAC_CARTAO_SUS], map: "pac_cns_idx")
@@ -414,6 +457,268 @@ model PAC {
   @@index([PAC_SO_CNV_COD, PAC_LTA_COD, PAC_GFC_NUM], map: "pac_so_cnv_idx")
 }
 
+model PRE {
+  PRE_TAB_COD              String    @db.Char(3)
+  PRE_SMK_TIPO             String    @db.Char(1)
+  PRE_SMK_COD              String    @db.Char(8)
+  PRE_UMO_SIGLA            String    @db.Char(6)
+  PRE_AUX                  Decimal?  @db.Decimal(5, 0)
+  PRE_PORTE                Decimal?  @db.Decimal(5, 0)
+  PRE_URG_P1               Decimal?  @db.Decimal(5, 2)
+  PRE_VLR_P2               Decimal?  @db.Decimal(20, 10)
+  PRE_URG_P2               Decimal?  @db.Decimal(5, 2)
+  PRE_VLR_P3               Decimal?  @db.Decimal(20, 10)
+  PRE_URG_P3               Decimal?  @db.Decimal(5, 2)
+  PRE_VLR_P4               Decimal?  @db.Decimal(20, 10)
+  PRE_URG_P4               Decimal?  @db.Decimal(5, 2)
+  PRE_RX                   Decimal?  @db.Decimal(8, 4)
+  PRE_CNV_DESCR            String?   @db.VarChar(255)
+  PRE_CCV                  String?   @db.VarChar(10)
+  PRE_ULT_AJUSTE           DateTime? @db.DateTime
+  PRE_TIPO_PRECO_ZERO      String?   @db.Char(1)
+  PRE_FILME_SEPARADO       String?   @db.Char(1)
+  PRE_VLR_P5               Decimal?  @db.Decimal(20, 10)
+  PRE_URG_P5               Decimal?  @db.Decimal(5, 2)
+  PRE_VL_HON_1             Decimal?  @db.Decimal(14, 2)
+  PRE_VL_HON_2             Decimal?  @db.Decimal(14, 2)
+  PRE_VL_HON_3             Decimal?  @db.Decimal(14, 2)
+  PRE_VL_HON_4             Decimal?  @db.Decimal(14, 2)
+  PRE_VL_HON_5             Decimal?  @db.Decimal(14, 2)
+  PRE_VL_CO_1              Decimal   @default(0, map: "DF__PRE__PRE_VL_CO_1__772B9A0B") @db.Decimal(10, 4)
+  PRE_VL_CO_2              Decimal   @default(0, map: "DF__PRE__PRE_VL_CO_2__781FBE44") @db.Decimal(10, 4)
+  PRE_VL_CO_3              Decimal   @default(0, map: "DF__PRE__PRE_VL_CO_3__7913E27D") @db.Decimal(10, 4)
+  PRE_VL_CO_4              Decimal   @default(0, map: "DF__PRE__PRE_VL_CO_4__7A0806B6") @db.Decimal(10, 4)
+  PRE_VL_CO_5              Decimal   @default(0, map: "DF__PRE__PRE_VL_CO_5__7AFC2AEF") @db.Decimal(10, 4)
+  PRE_CO_SEPARADO          String    @default("N", map: "DF__PRE__PRE_CO_SEPA__7BF04F28") @db.Char(1)
+  PRE_IND_EXPORT_ZERO      String?   @db.Char(1)
+  PRE_CCV_P1               String?   @db.VarChar(10)
+  PRE_CCV_P2               String?   @db.VarChar(10)
+  PRE_CCV_P3               String?   @db.VarChar(10)
+  PRE_CCV_P4               String?   @db.VarChar(10)
+  PRE_CCV_P5               String?   @db.VarChar(10)
+  PRE_VL_COPARTIC_1        Decimal   @default(0, map: "DF__PRE__PRE_VL_COPA__7CE47361") @db.Decimal(10, 4)
+  PRE_VL_COPARTIC_2        Decimal   @default(0, map: "DF__PRE__PRE_VL_COPA__7DD8979A") @db.Decimal(10, 4)
+  PRE_VL_COPARTIC_3        Decimal   @default(0, map: "DF__PRE__PRE_VL_COPA__7ECCBBD3") @db.Decimal(10, 4)
+  PRE_VL_COPARTIC_4        Decimal   @default(0, map: "DF__PRE__PRE_VL_COPA__7FC0E00C") @db.Decimal(10, 4)
+  PRE_VL_COPARTIC_5        Decimal   @default(0, map: "DF__PRE__PRE_VL_COPA__00B50445") @db.Decimal(10, 4)
+  PRE_ORIGEM_PRECO_MAT     String?   @db.Char(1)
+  PRE_SMK_TIPO_URG         String?   @db.Char(1)
+  PRE_SMK_COD_URG          String?   @db.Char(8)
+  PRE_CCV_URG              String?   @db.VarChar(10)
+  PRE_URG_EXTRA_FDS        Decimal?  @db.Decimal(5, 2)
+  PRE_FATOR_BRASINDICE     Decimal?  @db.Decimal(20, 10)
+  PRE_CONTA_FATOR_CONV     Decimal?  @db.Decimal(20, 10)
+  PRE_VLR_TESTE            Decimal?  @db.Decimal(20, 10)
+  PRE_VLR_P1               Decimal?  @db.Decimal(20, 10)
+  PRE_FATOR_MULT_TABMAT    Decimal   @default(1, map: "DF__PRE__PRE_FATOR_M__01A9287E") @db.Decimal(20, 10)
+  PRE_PERC_REDUC_P1        Decimal?  @db.Decimal(6, 2)
+  PRE_PERC_REDUC_P2        Decimal?  @db.Decimal(6, 2)
+  PRE_PERC_REDUC_P3        Decimal?  @db.Decimal(6, 2)
+  PRE_PERC_REDUC_P4        Decimal?  @db.Decimal(6, 2)
+  PRE_PERC_REDUC_P5        Decimal?  @db.Decimal(6, 2)
+  PRE_CCV_BK_TUSS          String?   @db.VarChar(10)
+  PRE_CCV_DESCR_BK_TUSS    String?   @db.VarChar(255)
+  pre_vlr_p6               Decimal?  @db.Decimal(20, 10)
+  pre_urg_p6               Decimal?  @db.Decimal(5, 2)
+  pre_vl_hon_6             Decimal?  @db.Decimal(14, 2)
+  pre_vl_co_6              Decimal   @default(0, map: "DF__PRE__pre_vl_co_6__286EBB3B") @db.Decimal(10, 4)
+  pre_ccv_p6               String?   @db.VarChar(10)
+  pre_vl_copartic_6        Decimal   @default(0, map: "DF__PRE__pre_vl_copa__2962DF74") @db.Decimal(10, 4)
+  pre_perc_reduc_p6        Decimal?  @db.Decimal(6, 2)
+  pre_uco_umo_sigla        String?   @db.Char(6)
+  pre_num_tiss             String?   @db.VarChar(20)
+  pre_unm_cod              String?   @db.Char(8)
+  pre_bras_preco_base      String?   @db.Char(5)
+  pre_ind_smk_urg_sub      String?   @db.Char(1)
+  pre_limite_desconto      Decimal?  @db.Decimal(14, 4)
+  pre_limite_desconto_tipo String?   @db.Char(1)
+  pre_cod_despesa_tiss     String?   @db.Char(2)
+  pre_cod_oper_coper       String?   @db.Char(14)
+  pre_tipo_cobr            String?   @db.VarChar(1)
+  pre_valor_sh             Decimal?  @db.Decimal(10, 2)
+  pre_valor_sp             Decimal?  @db.Decimal(10, 2)
+  pre_valor_sadt           Decimal?  @db.Decimal(10, 2)
+  pre_valor_sanest         Decimal?  @db.Decimal(10, 2)
+  pre_recateg              String?   @db.Char(2)
+  pre_ccv_aut              String?   @db.VarChar(15)
+  SMK                      SMK       @relation(fields: [PRE_SMK_TIPO, PRE_SMK_COD], references: [SMK_TIPO, SMK_COD], onUpdate: NoAction, map: "pre_smk_fk")
+
+  @@id([PRE_TAB_COD, PRE_SMK_TIPO, PRE_SMK_COD], map: "PRE_PK")
+  @@index([PRE_CCV], map: "pre_ccv_idx")
+  @@index([PRE_SMK_TIPO, PRE_SMK_COD], map: "pre_smk_idx")
+  @@index([PRE_UMO_SIGLA], map: "pre_umo_sigla_idx")
+}
+
+model PSV {
+  PSV_COD                      Int       @id(map: "PSV_PK")
+  PSV_TIPO                     String    @db.Char(2)
+  PSV_APEL                     String    @db.Char(20)
+  PSV_NOME                     String    @db.Char(50)
+  PSV_FONE1                    String?   @db.Char(14)
+  PSV_FONE2                    String?   @db.Char(14)
+  PSV_END                      String?   @db.Char(40)
+  PSV_COMP                     String?   @db.Char(40)
+  PSV_CEP                      String?   @db.Char(9)
+  PSV_CID                      String?   @db.Char(20)
+  PSV_UF                       String?   @db.Char(2)
+  PSV_VINC                     String?   @db.Char(1)
+  PSV_CC                       String    @db.Char(5)
+  PSV_TRAT                     String?   @db.Char(5)
+  PSV_CRM                      Int?
+  PSV_FAX                      String?   @db.Char(14)
+  PSV_BIP                      String?   @db.Char(8)
+  PSV_SEXO                     String?   @db.Char(1)
+  PSV_DT_NASC                  DateTime? @db.DateTime
+  PSV_FONE3                    String?   @db.Char(14)
+  PSV_FONEBIP                  String?   @db.Char(14)
+  PSV_CPF                      String?   @db.Char(14)
+  PSV_CDE_COD                  Decimal?  @db.Decimal(6, 0)
+  PSV_CCT_COD                  Decimal?  @db.Decimal(6, 0)
+  PSV_EMAIL                    String?   @db.VarChar(100)
+  PSV_OBS                      String?   @db.Text
+  PSV_FILA_NOME                String?   @db.VarChar(20)
+  PSV_FILA_TEMPO_MAX           Decimal?  @db.Decimal(4, 1)
+  PSV_EMP_COD                  Int?
+  PSV_IMG_COD_FOTO             Decimal?  @db.Decimal(8, 0)
+  PSV_IMG_COD_ASSINAT          Decimal?  @db.Decimal(8, 0)
+  PSV_FILA_ESCOPO              String?   @db.Char(1)
+  PSV_CNPJ_SOLIC               String?   @db.Char(16)
+  PSV_GMR_COD                  Int?
+  PSV_CID_UF                   String?   @db.Char(2)
+  PSV_EMP_COD_RHP              Int?
+  PSV_LAMINAS_DIA              Int?
+  PSV_LAMINAS_SUSP_DIA         Int?
+  PSV_LAMINAS_CQ_DIA           Int?
+  PSV_PSV_RESP                 Int?
+  PSV_OBS_CAD                  String?   @db.VarChar(255)
+  PSV_NIT                      String?   @db.VarChar(20)
+  PSV_CHAVE_SLINE              String?   @db.VarChar(40)
+  PSV_CELULAR                  String?   @db.Char(14)
+  PSV_CARTAO_SUS               String?   @db.VarChar(20)
+  PSV_PERFIL_CONSULT           String?   @db.VarChar(30)
+  PSV_PERFIL_ORDEM_CONSULT     String?   @db.VarChar(255)
+  PSV_PERFIL_CONSULT_FILA_DEST Int?
+  PSV_UNIMEDBH_COD             String?   @db.VarChar(20)
+  PSV_SUS_VINCULO              String?   @db.Char(2)
+  PSV_SUS_CNPJ                 String?   @db.VarChar(16)
+  PSV_SUS_NIVEL_SUP_SA04Z      String?   @db.VarChar(14)
+  PSV_CONSELHO                 String?   @db.Char(15)
+  PSV_PSV_COD_FILA             Int?
+  PSV_SUS_IND_RECEB            String?   @db.Char(1)
+  PSV_RG                       String?   @db.VarChar(15)
+  PSV_CNES                     String?   @db.VarChar(20)
+  PSV_RG_ORG                   String?   @db.Char(5)
+  PSV_RG_UF                    String?   @db.Char(2)
+  PSV_NOME_MAE                 String?   @db.VarChar(40)
+  PSV_NOME_PAI                 String?   @db.VarChar(40)
+  PSV_NATURALIDADE_CDE_COD     Decimal?  @db.Decimal(6, 0)
+  PSV_RAC_COD                  String?   @db.Char(1)
+  PSV_PIS_PASEP                String?   @db.VarChar(30)
+  PSV_RG_EMISSAO               DateTime? @db.DateTime
+  PSV_CER_COD                  String?   @db.Char(2)
+  PSV_CER_NUM                  String?   @db.VarChar(50)
+  PSV_CER_LIVRO                String?   @db.VarChar(10)
+  PSV_CER_FOLHA                Int?
+  PSV_CER_COMARCA              String?   @db.VarChar(20)
+  PSV_CER_SUBDIST              String?   @db.VarChar(20)
+  PSV_CER_DT_EMIS              DateTime? @db.DateTime
+  PSV_IND_BRASILEIRO           String?   @db.Char(1)
+  PSV_NACIONALIDADE_PAI_SIGLA  String?   @db.Char(4)
+  PSV_DATA_ENTRADA_BRASIL      DateTime? @db.DateTime
+  PSV_DATA_NATURALIZACAO       DateTime? @db.DateTime
+  PSV_NATURALIZACAO_PORTARIA   String?   @db.VarChar(10)
+  PSV_TITULO_ELEITOR           String?   @db.VarChar(30)
+  PSV_TITULO_ELEITOR_ZONA      String?   @db.VarChar(5)
+  PSV_TITULO_ELEITOR_SECAO     String?   @db.VarChar(5)
+  PSV_CTPS_NUMERO              String?   @db.VarChar(20)
+  PSV_CTPS_SERIE               String?   @db.VarChar(10)
+  PSV_CTPS_UF                  String?   @db.Char(2)
+  PSV_CTPS_DT_EMISSAO          DateTime? @db.DateTime
+  PSV_IND_FREQUENTA_ESCOLA     String?   @db.Char(1)
+  PSV_ECD_COD                  String?   @db.Char(1)
+  PSV_COJ_COD                  String?   @db.Char(2)
+  PSV_END_NUM                  String?   @db.VarChar(5)
+  PSV_END_BAIRRO               String?   @db.VarChar(20)
+  PSV_END_CEP_TIT              String?   @db.Char(3)
+  PSV_VIN_C_COD                String?   @db.Char(2)
+  PSV_VIN_T_COD                String?   @db.Char(2)
+  PSV_VIN_S_COD                String?   @db.Char(2)
+  PSV_CARGA_HOR_AMB            Int?
+  PSV_CARGA_HOR_HOS            Int?
+  PSV_CARGA_HOR_OUT            Int?
+  PSV_PG_BANCO                 String?   @db.VarChar(15)
+  PSV_PG_AGENCIA               String?   @db.VarChar(15)
+  PSV_PG_CONTA                 String?   @db.VarChar(15)
+  PSV_FILA_SENHA_PREFIXO       String?   @db.VarChar(5)
+  PSV_IND_CO_ASS               String    @default("S", map: "DF__PSV__PSV_IND_CO___16A44564") @db.Char(1)
+  PSV_CRM_STATUS               String?   @db.VarChar(30)
+  PSV_IND_VIEW_FORA_HAB        String    @default("S", map: "DF__PSV__PSV_IND_VIE__1798699D") @db.Char(1)
+  psv_ind_marc_mult            String?   @db.Char(1)
+  psv_ind_web_laudo_agd        String?   @db.Char(1)
+  psv_cod_externo              String?   @db.VarChar(100)
+  psv_qt_norm                  Int?
+  psv_cont_norm                Int?
+  psv_qt_prio                  Int?
+  psv_cont_prio                Int?
+  psv_pos_prof                 String?   @db.VarChar(10)
+  STR                          STR?      @relation(fields: [psv_str_cod], references: [STR_COD])
+  psv_str_cod                  String?   @db.Char(3)
+
+  psv_cor_botao_totem          String?   @db.Char(1)
+  psv_fila_smk_tipo            String?   @db.Char(1)
+  psv_fila_smk_cod             String?   @db.Char(8)
+  psv_ind_medico_vip           String?   @db.Char(1)
+  psv_dthr_reg                 DateTime? @db.DateTime
+  psv_ind_fila_exige_hsp       String?   @db.Char(1)
+  psv_ind_email_pac            String?   @db.Char(1)
+  psv_unimed7l_cod             String?   @db.VarChar(20)
+  psv_preceptor_psv_cod        Int?
+  psv_ind_crn_prov             String?   @db.Char(1)
+  psv_ind_revisor_labet        String?   @db.Char(1)
+  psv_emerges_smk_tipo         String?   @db.Char(1)
+  psv_emerges_smk_cod          String?   @db.Char(8)
+  psv_color_botao_totem        String?   @db.VarChar(20)
+  psv_cert                     String?   @db.Char(1)
+  psv_crm_generico             String?   @db.VarChar(15)
+  psv_emp_cod_dest             Int?
+  psv_psv_cod_dest             Int?
+  psv_certisign_remote_senha   String?   @db.VarChar(100)
+  psv_certisign_remote_status  String?   @db.Char(1)
+  psv_boaconsulta_id           String?   @db.VarChar(100)
+  psv_ind_boa_consulta         String    @default("N", map: "DF__PSV__psv_ind_boa__5BDA1BFF") @db.Char(1)
+  PSV_IND_BOA_CONSULTA_WL      String?   @db.Char(1)
+  psv_boaconsulta_url_foto     String?   @db.VarChar(2000)
+  psv_tolife_forward           Int?
+  psv_flag_mae_desconhecida    String?   @db.Char(1)
+  psv_num_passaporte           String?   @db.VarChar(10)
+  psv_pais_emissor_passaporte  String?   @db.Char(4)
+  psv_data_emissao_passaporte  DateTime? @db.DateTime
+  psv_data_validade_passaporte DateTime? @db.DateTime
+  psv_pais_nasc                String?   @db.Char(4)
+  psv_s_etnia_cod              String?   @db.Char(4)
+  psv_esp_cod                  String?   @db.Char(3)
+  psv_nome_social              String?   @db.VarChar(100)
+  psv_flag_nome_social         String?   @db.Char(1)
+  psv_rg_complemento           String?   @db.VarChar(255)
+  psv_genero                   String?   @db.Char(1)
+  psv_tipo_nacionalidade       String?   @db.Char(1)
+  psv_registro_funcional       String?   @db.VarChar(30)
+  psv_sob_supervisao           String?   @default("N", map: "DF__PSV__psv_sob_sup__12012286") @db.Char(1)
+  psv_surpervisor              Int?
+  psv_utc                      String?   @db.VarChar(20)
+  psv_ind_verao                String?   @db.Char(1)
+  psv_ocup                     Decimal?  @db.Decimal(6, 0)
+  psv_pais                     String?   @db.Char(4)
+  psv_supervisor               Int?
+
+  PAC PAC[]
+
+  PSV_PSV_psv_preceptor_psv_codToPSV       PSV?  @relation("PSV_psv_preceptor_psv_codToPSV", fields: [psv_preceptor_psv_cod], references: [PSV_COD], onDelete: NoAction, onUpdate: NoAction, map: "psv_precep_psv_fk")
+  other_PSV_PSV_psv_preceptor_psv_codToPSV PSV[] @relation("PSV_psv_preceptor_psv_codToPSV")
+  PSV_PSV_PSV_PSV_COD_FILAToPSV            PSV?  @relation("PSV_PSV_PSV_COD_FILAToPSV", fields: [PSV_PSV_COD_FILA], references: [PSV_COD], onDelete: NoAction, onUpdate: NoAction, map: "psv_psv_fila_fk")
+  other_PSV_PSV_PSV_PSV_COD_FILAToPSV      PSV[] @relation("PSV_PSV_PSV_COD_FILAToPSV")
+}
+
 model psv_totem {
   psv_t_psv_cod        Int
   psv_t_prefixo        String    @db.VarChar(5)
@@ -426,6 +731,647 @@ model psv_totem {
   psv_t_dthr_alteracao DateTime? @db.DateTime
 
   @@id([psv_t_psv_cod, psv_t_prefixo], map: "psv_totem_pk")
+}
+
+model RCL {
+  RCL_PAC                    Int
+  RCL_TPCOD                  String    @db.Char(1)
+  RCL_COD                    String    @db.Char(8)
+  RCL_DTHR                   DateTime  @db.DateTime
+  RCL_OSM_SERIE              Int?      @db.SmallInt
+  RCL_OSM                    Int?
+  RCL_SMM                    Int?
+  RCL_MED                    Int
+  RCL_TXT                    String?   @db.Text
+  RCL_APM                    Int?      @db.SmallInt
+  RCL_STAT                   String?   @db.Char(1)
+  RCL_FTE_SERIE              Int?      @db.SmallInt
+  RCL_FTE_NUM                Int?
+  RCL_RESULT                 String?   @db.VarChar(1)
+  RCL_HSP                    Int?      @db.SmallInt
+  RCL_VLR_RESULT             String?   @db.VarChar(20)
+  RCL_AMO_COD                String?   @db.Char(5)
+  RCL_OBS_AMOSTRA            String?   @db.VarChar(100)
+  RCL_USR_LOGIN              String?   @db.Char(10)
+  RCL_PESO                   Float?    @db.Real
+  RCL_ALTURA                 Float?    @db.Real
+  RCL_IDADE                  Int?      @db.SmallInt
+  RCL_LAUDO_RTF              String?   @db.Text
+  RCL_ORDEM                  Decimal?  @db.Decimal(10, 0)
+  RCL_DTHR_ATUAL             DateTime? @db.DateTime
+  RCL_VIAS                   Decimal?  @db.Decimal(8, 0)
+  RCL_DESTAQUE               String?   @db.Char(1)
+  RCL_DT_COLETA              DateTime? @db.DateTime
+  RCL_DTHR_LIB               DateTime? @db.DateTime
+  RCL_DTHR_IMP               DateTime? @db.DateTime
+  RCL_USR_LOGIN_LIB          String?   @db.Char(10)
+  RCL_CONCLUSAO              String?   @db.Char(1)
+  RCL_USR_LOGIN_DIGIT        String?   @db.Char(10)
+  RCL_DTHR_DIGIT             DateTime? @db.DateTime
+  RCL_APARELHO               String?   @db.VarChar(5)
+  RCL_ASO_AUTO               String?   @db.Char(1)
+  RCL_DM5_SOLIC              String?   @db.VarChar(50)
+  RCL_TXT_FIGURA             String?   @db.VarChar(1000)
+  RCL_APARELHO_SEQ           Int?
+  RCL_LOCAL_AMOSTRA          String?   @db.Char(1)
+  RCL_CHAVE_SAPDB            Int?
+  RCL_DTHR_SCAN              DateTime? @db.DateTime
+  RCL_IND_CAT                String?   @db.Char(1)
+  RCL_IND_LIB_AUTO           String?   @db.Char(1)
+  RCL_DSC_BASE               Int?
+  RCL_IND_APARELHO           String?   @db.Char(1)
+  RCL_DTHR_WEB               DateTime? @db.DateTime
+  RCL_AUDIO_REF              String?   @db.Char(1)
+  RCL_AUDIO_CONC_OD          String?   @db.VarChar(100)
+  RCL_AUDIO_CONC_OE          String?   @db.VarChar(100)
+  RCL_VOL_DIURESE            Decimal?  @db.Decimal(6, 2)
+  RCL_TEMPO_DIURESE          Int?
+  RCL_DTHR_LIB_1             DateTime? @db.DateTime
+  RCL_CCIH_IND_CULTURA       String    @default("N", map: "DF__RCL__RCL_CCIH_IN__4C0C31DC") @db.Char(1)
+  RCL_DTHR_ENVIO_INTERFACE   DateTime? @db.DateTime
+  RCL_CCIH_STR_COD           String?   @db.Char(3)
+  RCL_IND_AVALIADO           String?   @db.Char(1)
+  RCL_USR_LOGIN_LIB_AUTO     String?   @db.Char(10)
+  RCL_DTHR_VIEW_WEB          DateTime? @db.DateTime
+  RCL_IND_LAB                String?   @db.Char(1)
+  RCL_PSV_PREV_CO_ASS        Int?
+  RCL_PSV_PREV_CO_ASS_DTREG  DateTime? @db.DateTime
+  RCL_PSV_PREV_CO_ASS_USREG  String?   @db.Char(10)
+  RCL_CDG_SERIE              Int?
+  RCL_CDG_NUM                Int?
+  RCL_WAV_ID                 Int?
+  RCL_DTHR_CO_ASS            DateTime? @db.DateTime
+  RCL_DEL_USR_LOGIN          String?   @db.Char(10)
+  RCL_DEL_MOTIVO             String?   @db.VarChar(255)
+  RCL_DEL_DTHR               DateTime? @db.DateTime
+  RCL_P_OSM_SERIE            Int?      @db.SmallInt
+  RCL_P_OSM                  Int?
+  RCL_P_SMM                  Int?
+  RCL_MAMO_BI_RADS           String?   @db.VarChar(5)
+  rcl_id_aparelho            String?   @db.VarChar(30)
+  rcl_usr_web                String?   @db.Char(10)
+  rcl_ind_ass                String?   @db.Char(1)
+  rcl_ap_ind_maligno         String?   @db.Char(1)
+  rcl_ind_laudo_carestream   String?   @db.Char(1)
+  rcl_id                     Int?
+  rcl_fa_dt_ini              DateTime? @db.DateTime
+  rcl_fa_dt_fim              DateTime? @db.DateTime
+  rcl_local_amostra_cp       String?   @db.VarChar(1)
+  rcl_specimen_id            String?   @db.VarChar(20)
+  rcl_specimen_dthr          DateTime? @db.DateTime
+  rcl_dtlib_remoto           DateTime? @db.DateTime
+  rcl_lib_remoto             String?   @db.VarChar(1000)
+  rcl_ini_ditado             String?   @db.Char(1)
+  rcl_ini_ditado_dthr        DateTime? @db.DateTime
+  rcl_ini_ditado_usr         String?   @db.Char(10)
+  rcl_ini_ditado_gr_ses_id   Int?
+  rcl_utc                    String?   @db.VarChar(15)
+  rcl_cdg_serie_2            Int?
+  rcl_cdg_num_2              Int?
+  rcl_cdg_serie_3            Int?
+  rcl_cdg_num_3              Int?
+  rcl_hash_laudo             String?   @db.VarChar(64)
+  rcl_pde_num                Int?
+  rcl_dthr_integrado         DateTime? @db.DateTime
+  rcl_linfocitos             Int?
+  rcl_med_terc               Int?
+  rcl_ap_ind_especial        String?   @db.Char(1)
+  rcl_b2b_integracao         String?   @db.VarChar(30)
+  rcl_cache_laudo_serie      Int?
+  rcl_cache_laudo_numero     Int?
+  rcl_hemo_reimp_sesi        String?   @db.Char(1)
+  rcl_cod_integra_nexodata   Int?
+  RCL_DTHR_ENV_WS_ERRO       DateTime? @db.DateTime
+  rcl_enviado_cspar          String?   @db.Char(1)
+  rcl_dthr_enviado_ws        DateTime? @db.DateTime
+  rcl_msk_cod                Int?
+  rcl_ind_complexidade       String?   @db.Char(1)
+  rcl_copia                  String?   @db.Char(1)
+  rcl_copia_desc             String?   @db.VarChar(255)
+  rcl_copia_justif           String?   @db.VarChar(255)
+  rcl_pac_versao             Int?
+  rcl_aguardando_aprovacao   String?   @db.VarChar(1)
+  rcl_usr_aprovacao          String?   @db.VarChar(10)
+  rcl_dthr_aprovacao         DateTime? @db.DateTime
+  rcl_ind_verao              String?   @db.Char(1)
+  rcl_ind_provisorio         String?   @db.Char(1)
+  rcl_utc_iso                String?   @db.VarChar(30)
+  rcl_pex_contador           Int?
+  rcl_psv_versao             Int?
+  rcl_ind_agendamento_futuro String?   @db.Char(1)
+  rcl_ind_externo            String?   @db.Char(1)
+  rcl_justif_lanc            String?   @db.VarChar(255)
+  rcl_utc_aprovacao          String?   @db.VarChar(15)
+  rcl_utc_digit              String?   @default("-03:00", map: "DF__RCL__rcl_utc_dig__780C4659") @db.VarChar(15)
+  rcl_ind_verao_digit        String?   @db.VarChar(1)
+  rcl_dthr_reg               DateTime? @db.DateTime
+  rcl_dthr_reg_utc           String?   @db.VarChar(15)
+  rcl_dthr_reg_ind_verao     String?   @db.VarChar(1)
+  rcl_justif_retroativa      String?   @db.VarChar(255)
+  rcl_ind_interno            String?   @db.Char(1)
+  RCL_BLOQUEIO               String?   @db.Char(1)
+
+  SMM SMM? @relation(fields: [RCL_OSM_SERIE, RCL_OSM, RCL_SMM], references: [SMM_OSM_SERIE, SMM_OSM, SMM_NUM], onDelete: NoAction, onUpdate: NoAction, map: "rcl_osm_fk")
+  PAC PAC  @relation(fields: [RCL_PAC], references: [PAC_REG], onUpdate: NoAction, map: "rcl_pac_fk")
+  SMK SMK? @relation(fields: [RCL_TPCOD, RCL_COD], references: [SMK_TIPO, SMK_COD])
+
+  @@id([RCL_PAC, RCL_TPCOD, RCL_COD, RCL_DTHR], map: "RCL_PK")
+  @@index([RCL_STAT], map: "ix_Idxrcl")
+  @@index([RCL_COD, RCL_TPCOD, RCL_DTHR], map: "rcl_cod_dt_idx")
+  @@index([RCL_COD, RCL_TPCOD, RCL_DTHR_ATUAL], map: "rcl_cod_dtatual_idx")
+  @@index([RCL_DTHR_ATUAL], map: "rcl_dthr_atual_idx")
+  @@index([RCL_DTHR], map: "rcl_dthr_idx")
+  @@index([RCL_DTHR_IMP], map: "rcl_dthr_imp_idx")
+  @@index([RCL_DTHR_LIB], map: "rcl_dthr_lib_idx")
+  @@index([RCL_FTE_SERIE, RCL_FTE_NUM], map: "rcl_fte_idx")
+  @@index([RCL_OSM_SERIE, RCL_OSM, RCL_SMM], map: "rcl_osm_idx")
+  @@index([RCL_PAC, RCL_DTHR], map: "rcl_pac_dt_idx")
+}
+
+model SMK {
+  SMK_TIPO String @db.Char(1)
+  SMK_COD  String @db.Char(8)
+  SMK_ROT  String @db.Char(20)
+  SMK_NOME String @db.Char(60)
+  CTF      CTF?   @relation(fields: [SMK_TIPO, SMK_CTF], references: [CTF_TIPO, CTF_COD])
+
+  SMK_CTF                       String    @db.Char(5)
+  STR                           STR?      @relation(fields: [SMK_STR], references: [STR_COD])
+  SMK_STR                       String    @db.Char(3)
+  SMK_LD                        String?   @db.Char(2)
+  SMK_AGD                       Int?      @db.SmallInt
+  SMK_ELD                       Decimal?  @db.Decimal(8, 2)
+  SMK_AMB                       String?   @db.Char(11)
+  SMK_CMP                       Int?      @db.SmallInt
+  SMK_INST                      String?   @db.Text
+  SMK_IND_MED                   String    @default("N", map: "DF__SMK__SMK_IND_MED__1A0AC1F4") @db.Char(1)
+  SMK_GMM_COD                   String?   @db.Char(3)
+  SMK_ORDEM                     Int?      @db.SmallInt
+  SMK_SEXO                      String    @db.Char(1)
+  SMK_STATUS                    String?   @db.Char(1)
+  SMK_SUS                       String?   @db.Char(8)
+  SMK_TIPO_AMOSTRA              String?   @db.Char(2)
+  SMK_PACOTE                    String?   @db.VarChar(1)
+  SMK_TIPO_DOC                  String?   @db.Char(3)
+  SMK_ETI_COD                   String?   @db.Char(3)
+  SMK_LD_TIPO                   String?   @db.Char(3)
+  SMK_FATOR_BRASINDICE          Decimal?  @db.Decimal(20, 10)
+  SMK_PRECO_CUSTO               Decimal?  @db.Decimal(14, 4)
+  SMK_FICHA_CLINICA             String?   @db.Char(1)
+  SMK_UN_TP_PARTIC              String?   @db.Char(1)
+  SMK_UN_TP_TABELA              String?   @db.Char(1)
+  SMK_TIPO_CONSULTA             String?   @db.Char(1)
+  SMK_GSS_COD                   String?   @db.Char(4)
+  SMK_SMK_INDIV_TIPO            String?   @db.Char(1)
+  SMK_SMK_INDIV_COD             String?   @db.Char(8)
+  SMK_SMK_INDIV_FATOR           Decimal?  @db.Decimal(10, 4)
+  SMK_TERC                      String?   @db.Char(1)
+  SMK_TERC_EMP_COD              Int?
+  SMK_APAC                      String?   @db.Char(1)
+  SMK_ABREV                     String?   @db.VarChar(6)
+  SMK_UN_DESTINO                String?   @db.Char(1)
+  SMK_UN_DESTINO_COD            String?   @db.Char(10)
+  SMK_IND_PRECO_CONV            String?   @db.Char(1)
+  SMK_SUS_FAIXA_ETARIA          String?   @db.Char(1)
+  SMK_UNM_COD                   String?   @db.Char(8)
+  SMK_DESC_EXTENDIDA            String?   @db.VarChar(255)
+  SMK_FORNECEDOR                String?   @db.VarChar(40)
+  SMK_EXM_CENTRO_CIR            String?   @db.Char(1)
+  SMK_COD_SIMPRO                String?   @db.Char(10)
+  SMK_SUS_COD_AIH               String?   @db.Char(8)
+  SMK_SUS_VALOR_SH              Decimal?  @db.Decimal(10, 2)
+  SMK_SUS_VALOR_SP              Decimal?  @db.Decimal(10, 2)
+  SMK_SUS_VALOR_SADT            Decimal?  @db.Decimal(10, 2)
+  SMK_SUS_PP                    Decimal?  @db.Decimal(6, 0)
+  SMK_IDADE_MIN                 Decimal?  @db.Decimal(3, 0)
+  SMK_IDADE_MAX                 Decimal?  @db.Decimal(3, 0)
+  SMK_IND_SUS                   String?   @db.Char(1)
+  SMK_IND_CQE                   String?   @db.Char(1)
+  SMK_TIPO_PRECO_SIMPRO         String?   @db.Char(3)
+  SMK_IND_COLETADEIRA           String?   @db.Char(1)
+  SMK_ELD_HORAS                 Decimal?  @db.Decimal(6, 0)
+  SMK_SUS_BPA_TPA               String?   @db.Char(4)
+  SMK_SUS_BPA_GRA               String?   @db.Char(4)
+  SMK_CCIH                      String?   @db.VarChar(1)
+  SMK_APAC_PROC_AUX             String?   @db.Char(1)
+  SMK_IND_COFINS                String    @default("N", map: "DF__SMK__SMK_IND_COF__1AFEE62D") @db.Char(1)
+  SMK_AM_QTDE                   String?   @db.VarChar(200)
+  SMK_AM_PRESERV                String?   @db.VarChar(200)
+  SMK_AM_RECIPIENTE             String?   @db.VarChar(200)
+  SMK_APAC_FINALIDADE           String?   @db.Char(1)
+  SMK_APAC_CIDS                 String?   @db.VarChar(200)
+  SMK_APAC_MORF                 String?   @db.VarChar(100)
+  SMK_IND_CURVA                 Decimal?  @db.Decimal(4, 0)
+  SMK_IND_PEX_LEA               String?   @db.Char(2)
+  SMK_EXP_UNIMED_SOL_QT_FATOR   Decimal?  @db.Decimal(10, 4)
+  SMK_IND_LD_REV                String?   @db.Char(1)
+  SMK_IND_VDF                   String?   @db.Char(1)
+  SMK_IND_AGD_SESSOES           String?   @db.Char(1)
+  SMK_IND_DICOM                 String?   @db.Char(2)
+  SMK_PEX_INTERV_MIN            Decimal?  @db.Decimal(4, 0)
+  SMK_IND_OFT_OLHO              String?   @db.Char(1)
+  SMK_IND_LIB_AUTO              String?   @db.Char(1)
+  SMK_COD_EXTERNO               String?   @db.VarChar(11)
+  SMK_PSV_EXE_DEFAULT           Int?
+  SMK_SUS_VALOR_SANEST          Decimal   @default(0, map: "DF__SMK__SMK_SUS_VAL__1BF30A66") @db.Decimal(10, 2)
+  SMK_IND_USUAL                 String?   @db.Char(1)
+  SMK_ORDEM_FILA                Int?      @db.SmallInt
+  SMK_PERC_LIB_AUTO             Decimal?  @db.Decimal(5, 2)
+  SMK_RESULT_COMP               String?   @db.Char(1)
+  SMK_IND_LIB_ESPECIAL          String?   @db.Char(1)
+  SMK_IND_LIBERA_LEUCO          String?   @db.Char(1)
+  SMK_IND_INFO_MEDICO           String?   @db.Char(1)
+  SMK_QTDE_DEFAULT              Decimal   @default(1, map: "DF__SMK__SMK_QTDE_DE__1CE72E9F") @db.Decimal(6, 0)
+  SMK_USA_CONTADOR_ETI          String?   @db.Char(1)
+  SMK_PERC_LIB_ESPECIAL         Decimal?  @db.Decimal(6, 2)
+  SMK_IND_ALERTA_ALTERADO       String    @default("N", map: "DF__SMK__SMK_IND_ALE__1DDB52D8") @db.Char(1)
+  SMK_SIMPRO_FATOR              Decimal   @default(1, map: "DF__SMK__SMK_SIMPRO___1ECF7711") @db.Decimal(14, 4)
+  SMK_DICOM_STATION_AETITLE     String?   @db.VarChar(40)
+  SMK_IND_LAB_DUPLA_DIGIT       String?   @db.Char(3)
+  SMK_IND_FRAC                  String    @default("N", map: "DF__SMK__SMK_IND_FRA__1FC39B4A") @db.Char(1)
+  SMK_EXAME_DIA_EXEC            String?   @db.VarChar(10)
+  SMK_CAB_NOME                  String?   @db.Char(25)
+  SMK_SUS_AIH_ATO               String?   @db.Char(2)
+  SMK_SUS_IND_PROC_ESPECIAL     String    @default("N", map: "DF__SMK__SMK_SUS_IND__20B7BF83") @db.Char(1)
+  SMK_SUS_PONTOS_ATO            Decimal?  @db.Decimal(6, 0)
+  SMK_SUS_COD_SIPAC             String?   @db.VarChar(10)
+  SMK_TEMPO_TRAVA_LAUDO         Int?
+  SMK_SUS_PROC_ATO_CLINICO      String    @default("N", map: "DF__SMK__SMK_SUS_PRO__21ABE3BC") @db.Char(1)
+  SMK_SUS_PONTOS_ANEST          Decimal?  @db.Decimal(6, 0)
+  SMK_SUS_AIH_VINCULO           String?   @db.Char(2)
+  SMK_SUS_ESCOPO                String?   @db.Char(1)
+  SMK_DZSET_PRESTADOR           String?   @db.Char(1)
+  SMK_SUS_AIH_ATO_CPF           String?   @db.Char(1)
+  SMK_SUS_COD_UNICO             String?   @db.VarChar(15)
+  SMK_DICOM_COD_SCH_DESIG       String?   @db.VarChar(40)
+  SMK_TISS_VALOR_ZERO           String    @default("N", map: "DF__SMK__SMK_TISS_VA__22A007F5") @db.Char(1)
+  SMK_IND_WEB_LAUDO             String    @default("S", map: "DF__SMK__SMK_IND_WEB__23942C2E") @db.Char(1)
+  SMK_SUS_CAMPO_VALOR           String?   @db.Char(5)
+  SMK_LAC_FORM_PADRAO           String?   @db.Char(1)
+  SMK_TISS_GRAU_PART            String?   @db.Char(2)
+  SMK_AGD_TEMPO_PREPARO         Int?
+  SMK_LAC_SESSAO_TEMPO          Int?
+  SMK_IND_GERA_OS_RCL           String?   @db.Char(1)
+  SMK_TISS_IND_TAXA_SOLICITAVEL String    @default("N", map: "DF__SMK__SMK_TISS_IN__24885067") @db.Char(1)
+  SMK_IND_ASSINAR               String?   @db.Char(1)
+  SMK_INST_INI_POPUP            String?   @db.Char(1)
+  SMK_INST_POPUP_PRAZO          DateTime? @db.DateTime
+  SMK_SUS_TU_PONTOS             Decimal?  @db.Decimal(6, 0)
+  SMK_SUS_TU_PP                 Decimal?  @db.Decimal(6, 0)
+  SMK_ESP_COD                   String?   @db.Char(3)
+  SMK_IND_ATENDE                String    @default("S", map: "DF__SMK__SMK_IND_ATE__257C74A0") @db.Char(1)
+  SMK_SRTN_PATOLOGIA            String?   @db.VarChar(40)
+  SMK_ETI_QTDE_DEF              Int?
+  SMK_IND_SIGILOSO              String?   @db.Char(1)
+  SMK_APAC_TEMPO                Int?
+  SMK_SRTN_FASE                 Int?
+  SMK_AMOSTRA_TEMPO_DESCARTE    Int?
+  SMK_PN_PATOLOGIA              String?   @db.VarChar(40)
+  SMK_COD_NCM                   String?   @db.VarChar(10)
+  SMK_TP_PACOTE                 String?   @db.Char(1)
+  SMK_IND_FILA_OS               String?   @db.Char(1)
+  SMK_TISS_IND_ODONTO           String    @default("N", map: "DF__SMK__SMK_TISS_IN__267098D9") @db.Char(1)
+  SMK_IPSEMG_IND_BILATERAL      String    @default("N", map: "DF__SMK__SMK_IPSEMG___2764BD12") @db.Char(1)
+  SMK_LDW_RLS_COD_PRT           Int?
+  SMK_IND_CONFIRM_AGM           String    @default("S", map: "DF__SMK__SMK_IND_CON__2858E14B") @db.Char(1)
+  SMK_PRECO_CUSTO_DIRETO        Decimal?  @db.Decimal(14, 2)
+  SMK_IND_CO_ASS                String    @default("S", map: "DF__SMK__SMK_IND_CO___294D0584") @db.Char(1)
+  SMK_IND_MARC_MULT             String?   @db.Char(1)
+  SMK_IND_OPME                  String    @default("N", map: "DF__SMK__SMK_IND_OPM__2A4129BD") @db.Char(1)
+  SMK_IND_PACOTE_MATMED         String    @default("N", map: "DF__SMK__SMK_IND_PAC__2B354DF6") @db.Char(1)
+  SMK_SUS_TETO_BPA              Int?
+  SMK_IND_EXIB_RES_PROV         String    @default("S", map: "DF__SMK__SMK_IND_EXI__2C29722F") @db.Char(1)
+  SMK_SUS_BPA_COBRANCA          String?   @db.Char(1)
+  SMK_TISS_TECNICA              String?   @db.Char(1)
+  smk_unimed_bh_gp              String?   @db.Char(2)
+  smk_ciha_regra                String?   @db.Char(1)
+  smk_ind_gera_laudo            String    @default("S", map: "DF__SMK__smk_ind_ger__5946FCC0") @db.Char(1)
+  smk_ind_pend_default          String?   @db.Char(1)
+  smk_idade_min_dias            Int?
+  smk_ind_lab_quebra_pag        String?   @db.Char(1)
+  smk_crg_tempo_padrao          Int?
+  smk_ind_acrescimo_sap         String?   @db.Char(1)
+  smk_ind_clink_lib_auto        String    @default("S", map: "DF__SMK__smk_ind_cli__3999473D") @db.Char(1)
+  smk_alv_descricao             String?   @db.VarChar(100)
+  smk_crg_complementar          String    @default("N", map: "DF__SMK__smk_crg_com__102D1D56") @db.Char(1)
+  smk_ind_pep_resumo            String?   @db.Char(1)
+  smk_pep_resumo_dsc_cod        Int?
+  smk_pep_resumo_atr_num        Int?      @db.SmallInt
+  smk_apac_tipo_periodo         String?   @db.Char(1)
+  smk_ind_web_laudo_agd         String?   @db.Char(1)
+  smk_ict_tipo_def              String?   @db.Char(1)
+  smk_ict_titulo                String?   @db.VarChar(255)
+  smk_ict_cito_coloracao        String?   @db.VarChar(100)
+  smk_ict_cito_lamina           String?   @db.VarChar(100)
+  smk_gih_edl_default           String?   @db.Char(5)
+  smk_ind_amostra               String?   @db.Char(1)
+  smk_apac_csf                  String?   @db.VarChar(3)
+  smk_apac_srv                  String?   @db.VarChar(3)
+  smk_ind_lista_reg_clin_geral  String?   @db.Char(1)
+  smk_b2b_importa_crlf          String?   @db.VarChar(1)
+  smk_ind_generico              String?   @db.Char(1)
+  smk_generico_tipo             String?   @db.Char(1)
+  smk_generico_cod              String?   @db.Char(8)
+  smk_ind_fratura               String?   @db.Char(1)
+  smk_ind_vacina                String?   @db.Char(1)
+  smk_uti12_cod                 String?   @db.Char(8)
+  smk_idade_max_dias            Int?
+  smk_ind_sus_aih_exibe_doc     String    @default("S", map: "DF__SMK__smk_ind_sus__1EBB33CF") @db.Char(1)
+  smk_inst_agd_popup            String    @default("N", map: "DF__SMK__smk_inst_ag__1FAF5808") @db.Char(1)
+  smk_inst_agd_popup_prazo      DateTime? @db.DateTime
+  smk_ind_bloq_lib_res          String    @default("N", map: "DF__SMK__smk_ind_blo__5EA0AEBA") @db.Char(1)
+  smk_ind_reduc_preco           String    @default("S", map: "DF__SMK__smk_ind_red__636563D7") @db.Char(1)
+  smk_ind_ref_prazo             String?   @db.Char(1)
+  smk_ind_msg_ret_pend          String?   @db.Char(1)
+  smk_ind_result_03_comb        String?   @db.Char(1)
+  smk_ind_laudo_sem_os          String    @default("S", map: "DF__SMK__smk_ind_lau__67F50ECA") @db.Char(1)
+  smk_ind_exibe_pcmso           String?   @db.Char(1)
+  smk_sus_glaucoma_linha        String?   @db.Char(30)
+  smk_so_valid_adm              String    @default("S", map: "DF__SMK__smk_so_vali__50DC9F48") @db.Char(1)
+  smk_sus_exp_saude_mov         String    @default("S", map: "DF__SMK__smk_sus_exp__52C4E7BA") @db.Char(1)
+  smk_cod_tuss                  String?   @db.VarChar(10)
+  smk_unimed_bh_gp_v3           String?   @db.Char(2)
+  smk_inst_operador             String?   @db.Text
+  smk_ind_print_res_prov        String?   @db.Char(1)
+  smk_ind_psv_exe_from_solic    String?   @db.Char(1)
+  smk_vnc_v_id                  Int?
+  smk_ind_agd_mail_final        String    @default("S", map: "DF__SMK__smk_ind_agd__3B776E0E") @db.Char(1)
+  smk_ind_check_plano_terap     String?   @db.Char(1)
+  smk_acao_quest_pend           String?   @db.Char(1)
+  smk_ind_bloq_os_fat           String    @default("S", map: "DF__SMK__smk_ind_blo__6EC207EA") @db.Char(1)
+  smk_ind_refresh_apac          String    @default("S", map: "DF__SMK__smk_ind_ref__15A6CAE1") @db.Char(1)
+  smk_vdf_smk_tipo              String?   @db.Char(1)
+  smk_vdf_smk_cod               String?   @db.Char(8)
+  smk_cfo_cod                   String?   @db.Char(5)
+  smk_cvita_tipo_exame_id       Int?
+  smk_prazo                     Int?
+  smk_sus_teste_compat_proc     String    @default("S", map: "DF__SMK__smk_sus_tes__7836638B") @db.Char(1)
+  smk_atv_cod                   String?   @db.Char(10)
+  smk_apac_sap_tipo             String?   @db.Char(1)
+  smk_inst_ope_ini_popup        String?   @db.Char(1)
+  smk_inst_ope_agd_popup        String?   @db.Char(1)
+  smk_psv_aux_default           Int?
+  smk_psv_agd_base              Int?
+  smk_ind_vacina_lsm            String?   @db.VarChar(4)
+  smk_intern                    String?   @db.VarChar(1)
+  smk_ind_terc_via_ws           String?   @default("S", map: "DF_SMK_IND_TERC_VIA_WS") @db.Char(1)
+  smk_inst_rd                   String?   @db.VarChar(255)
+  smk_e_social                  String?   @db.VarChar(7)
+  smk_ind_sus_equipe            String?   @db.Char(1)
+  smk_ind_sus_cnes              String?   @db.Char(1)
+  smk_dthr_alter                DateTime? @db.DateTime
+  smk_dthr_envio_boaconsulta    DateTime? @db.DateTime
+  smk_ind_col_dom               String?   @db.Char(1)
+  smk_ind_boaconsulta           String?   @db.VarChar(1)
+  smk_cspar_gatilho             String?   @db.VarChar(15)
+  smk_ind_teleconsulta          String    @default("N", map: "DF__SMK__smk_ind_tel__00177C75") @db.Char(1)
+  SMK_IND_BOACONSULTA_WL        String?   @db.Char(1)
+  SMK_IND_BCS_TAB_PAD_VLD       String?   @db.Char(1)
+  SMK_DAT_ATU_TAB_PAD           DateTime? @db.DateTime
+  SMK_BCS_PESO_MIN              Decimal?  @db.Decimal(6, 3)
+  SMK_BCS_PESO_MAX              Decimal?  @db.Decimal(6, 3)
+  SMK_BCS_ALTURA_MIN            Decimal?  @db.Decimal(4, 2)
+  SMK_BCS_ALTURA_MAX            Decimal?  @db.Decimal(4, 2)
+  smk_exp_rtf                   String    @default("N", map: "DF__SMK__smk_exp_rtf__36738D26") @db.Char(1)
+  SMK_CAPTA                     String?   @default("N", map: "DF__SMK__SMK_CAPTA__4F3F3AF0") @db.Char(1)
+  smk_sus_proc_sem_cbo          String?   @default("N", map: "DF__SMK__smk_sus_pro__55EC387F") @db.Char(1)
+  smk_sus_proc_sem_cid          String?   @default("N", map: "DF__SMK__smk_sus_pro__56E05CB8") @db.Char(1)
+  smk_bcs_ind_agendavel         String?   @default("N", map: "DF_SMK_BCS_IND_AGENDAVEL") @db.Char(1)
+
+  RCL RCL[]
+
+  SMK_SMK_smk_generico_tipo_smk_generico_codToSMK       SMK?  @relation("SMK_smk_generico_tipo_smk_generico_codToSMK", fields: [smk_generico_tipo, smk_generico_cod], references: [SMK_TIPO, SMK_COD], onDelete: NoAction, onUpdate: NoAction, map: "smk_gen_smk_fk")
+  other_SMK_SMK_smk_generico_tipo_smk_generico_codToSMK SMK[] @relation("SMK_smk_generico_tipo_smk_generico_codToSMK")
+
+  SMK_SMK_SMK_SMK_INDIV_TIPO_SMK_SMK_INDIV_CODToSMK       SMK?  @relation("SMK_SMK_SMK_INDIV_TIPO_SMK_SMK_INDIV_CODToSMK", fields: [SMK_SMK_INDIV_TIPO, SMK_SMK_INDIV_COD], references: [SMK_TIPO, SMK_COD], onDelete: NoAction, onUpdate: NoAction, map: "smk_smk_fk")
+  other_SMK_SMK_SMK_SMK_INDIV_TIPO_SMK_SMK_INDIV_CODToSMK SMK[] @relation("SMK_SMK_SMK_INDIV_TIPO_SMK_SMK_INDIV_CODToSMK")
+
+  SMK_SMK_smk_vdf_smk_tipo_smk_vdf_smk_codToSMK       SMK?  @relation("SMK_smk_vdf_smk_tipo_smk_vdf_smk_codToSMK", fields: [smk_vdf_smk_tipo, smk_vdf_smk_cod], references: [SMK_TIPO, SMK_COD], onDelete: NoAction, onUpdate: NoAction, map: "smk_vdf_smk_fk")
+  other_SMK_SMK_smk_vdf_smk_tipo_smk_vdf_smk_codToSMK SMK[] @relation("SMK_smk_vdf_smk_tipo_smk_vdf_smk_codToSMK")
+
+  SMM_SMM_SMM_TPCOD_SMM_CODToSMK                SMM[] @relation("SMM_SMM_TPCOD_SMM_CODToSMK")
+  SMM_SMM_SMM_PAI_SMK_TIPO_SMM_PAI_SMK_CODToSMK SMM[] @relation("SMM_SMM_PAI_SMK_TIPO_SMM_PAI_SMK_CODToSMK")
+  PRE                                           PRE[]
+
+  @@id([SMK_TIPO, SMK_COD], map: "SMK_PK")
+  @@index([SMK_ETI_COD], map: "ix_IndexName")
+}
+
+model SMM {
+  SMM_OSM_SERIE              Int       @db.SmallInt
+  SMM_OSM                    Int
+  SMM_NUM                    Int
+  SMM_TPCOD                  String    @db.Char(1)
+  SMM_COD                    String    @db.Char(8)
+  SMM_QT                     Decimal   @db.Decimal(8, 0)
+  SMM_EXEC                   String    @db.Char(1)
+  SMM_SFAT                   String    @db.Char(1)
+  SMM_FAT_SERIE              Int?      @db.SmallInt
+  SMM_FAT                    Int?
+  SMM_REP                    String    @db.Char(10)
+  STR                        STR?      @relation(fields: [SMM_STR], references: [STR_COD])
+  SMM_STR                    String    @db.Char(3)
+  SMM_MED                    Int
+  SMM_VLCH                   Decimal   @db.Decimal(4, 0)
+  SMM_VLR                    Float
+  SMM_RX                     Float?
+  SMM_AUX                    Int?
+  SMM_VIA_ACESSO             String?   @db.Char(1)
+  SMM_FTE_SERIE              Int?      @db.SmallInt
+  SMM_FTE_NUM                Int?
+  SMM_DTHR_EXEC              DateTime? @db.DateTime
+  SMM_NUM_PAI                Int?
+  SMM_LAC_NUM                Decimal?  @db.Decimal(6, 0)
+  SMM_PAC_REG                Int?
+  SMM_HSP_NUM                Int?      @db.SmallInt
+  SMM_CTH_NUM                Int?
+  SMM_CNV_COD                String?   @db.Char(3)
+  SMM_AMO_COD                String?   @db.Char(5)
+  SMM_OBS_AMOSTRA            String?   @db.VarChar(100)
+  SMM_SENHA                  String?   @db.Char(20)
+  SMM_IND_URG                String?   @db.VarChar(1)
+  SMM_MNS_SERIE              Int?
+  SMM_MNS_NUM                Int?
+  SMM_HON_SEQ                Decimal?  @db.Decimal(8, 0)
+  SMM_HORA_ESP               String?   @db.Char(1)
+  SMM_ESP                    String?   @db.Char(3)
+  SMM_PAI_SMK_TIPO           String?   @db.Char(1)
+  SMM_PAI_SMK_COD            String?   @db.Char(8)
+  SMM_YYMM                   String?   @db.VarChar(6)
+  SMM_DTHR_PEND              DateTime? @db.DateTime
+  SMM_TIPO_FATURA            String?   @db.Char(1)
+  SMM_PRE_CCV                String?   @db.VarChar(10)
+  SMM_PACOTE                 String?   @db.VarChar(1)
+  SMM_DTHR_COLETA            DateTime? @db.DateTime
+  SMM_USR_LOGIN_LANC         String?   @db.Char(10)
+  SMM_DTHR_LANC              DateTime? @db.DateTime
+  SMM_DTHR_ALTER             DateTime? @db.DateTime
+  SMM_MTE_SERIE              Int?
+  SMM_MTE_SEQ                Int?
+  SMM_AJUSTE_VLR             Float?
+  SMM_MOG_COD_AJUSTE         Int?
+  SMM_PRECO_CUSTO            Float?
+  SMM_SENHA_ATENDENTE        String?   @db.VarChar(30)
+  SMM_SENHA_DTHR_LIB         DateTime? @db.DateTime
+  SMM_SMA_SERIE              Int?
+  SMM_SMA_NUM                Int?
+  SMM_ISM_SEQ                Int?
+  SMM_MOTIVO_CANCELA         String?   @db.VarChar(100)
+  SMM_DT_RESULT              DateTime? @db.DateTime
+  SMM_USR_LOGIN_COLETA       String?   @db.Char(10)
+  SMM_LTA_COD                String?   @db.Char(8)
+  SMM_OBS_PEND               String?   @db.VarChar(100)
+  SMM_CTLE_CNV               String?   @db.Char(15)
+  SMM_NO_RECALC              String?   @db.Char(1)
+  SMM_AJUSTE_ESTORNO         Float?
+  SMM_VLR_ESTORNO            Float?
+  SMM_VLR_COPARTIC           Float?
+  SMM_VLR_DESCONTO           Float?
+  SMM_COD_AMOSTRA            String?   @db.VarChar(20)
+  SMM_COD_EXTERNO            String?   @db.VarChar(20)
+  SMM_SEQ_AMOSTRA            Int?
+  SMM_SENHA_DTHR_VALID       DateTime? @db.DateTime
+  SMM_CML_FAT_SERIE          Int?      @db.SmallInt
+  SMM_CML_FAT_NUM            Int?
+  SMM_CML_VLR                Float?
+  SMM_IND_ANEXO              String?   @db.Char(1)
+  SMM_PSC_NUM                Decimal?  @db.Decimal(5, 0)
+  SMM_CUSTO_OPER             Decimal?  @db.Decimal(10, 4)
+  SMM_VL_FILME               Decimal?  @db.Decimal(10, 2)
+  SMM_VL_CUSTO_OPER          Decimal?  @db.Decimal(10, 2)
+  SMM_DESC_CONV              Float?
+  SMM_ETI_COD_AMOSTRA        String?   @db.VarChar(20)
+  SMM_CML_QT                 Decimal?  @db.Decimal(4, 0)
+  SMM_SUS_NF_NUM             Int?
+  SMM_MREQ_1                 String?   @default("S", map: "DF__SMM__SMM_MREQ_1__32D66FBE") @db.Char(1)
+  SMM_MREQ_2                 String?   @default("S", map: "DF__SMM__SMM_MREQ_2__33CA93F7") @db.Char(1)
+  SMM_MREQ_3                 String?   @default("S", map: "DF__SMM__SMM_MREQ_3__34BEB830") @db.Char(1)
+  SMM_IND_EXPORT_ZERO        String?   @db.Char(1)
+  SMM_IND_RESULT_PARCIAL     String?   @db.Char(1)
+  SMM_DOCNUM_AUT             String?   @db.VarChar(20)
+  SMM_CODAUT_AUT             String?   @db.VarChar(20)
+  SMM_CODMSG_AUT             String?   @db.VarChar(5)
+  SMM_AUDITO_STATUS          String?   @db.Char(1)
+  SMM_AUDITO_DTHR            DateTime? @db.DateTime
+  SMM_AUDITO_USR_LOGIN       String?   @db.Char(10)
+  SMM_AUDITO_OBS             String?   @db.VarChar(50)
+  SMM_QT_FRAC                Decimal?  @db.Decimal(6, 2)
+  SMM_SUS_NF_CNPJ            String?   @db.VarChar(16)
+  SMM_TAB_COD                String?   @db.Char(3)
+  SMM_SUS_PROC_ESP           String?   @db.Char(1)
+  SMM_CANC_MOT_TIPO          String?   @db.Char(3)
+  SMM_CANC_MOT_COD           String?   @db.Char(5)
+  SMM_PERC_REDUC             Decimal?  @db.Decimal(6, 2)
+  SMM_PRE_CCV_BK             String?   @db.VarChar(10)
+  SMM_TAB_COD_BK             String?   @db.VarChar(3)
+  SMM_TISS_TECNICA           String?   @db.Char(1)
+  SMM_ORDEM_AIH              Int?
+  SMM_RCI_SERIE              Int?      @db.SmallInt
+  SMM_RCI_NUM                Int?
+  SMM_ECI_FUNCAO             String?   @db.Char(1)
+  SMM_SUS_NF_CNPJ_FABRIC     String?   @db.VarChar(16)
+  SMM_SUS_NF_SERIE           String?   @db.VarChar(20)
+  SMM_SUS_NF_LOTE            String?   @db.VarChar(20)
+  SMM_SUS_REG_ANVISA         String?   @db.VarChar(20)
+  SMM_CTLE_CNV_HI            String?   @db.Char(15)
+  SMM_P_OSM_SERIE            Int?      @db.SmallInt
+  SMM_P_OSM_NUM              Int?
+  SMM_P_SMM_NUM              Int?
+  SMM_TISS_IND_GUIA_ITEM     String?   @db.Char(1)
+  SMM_TISS_ODONTO_DENTE      String?   @db.VarChar(5)
+  SMM_TISS_ODONTO_REGIAO     String?   @db.VarChar(5)
+  SMM_TISS_ODONTO_FACE       String?   @db.VarChar(5)
+  SMM_GR_SES_ID              Int?
+  SMM_PERC_REDUC_VLR_BASE    Decimal?  @db.Decimal(20, 10)
+  SMM_IND_PRT                String?   @db.Char(1)
+  SMM_RECIPIENTE_LSF         String?   @db.Char(10)
+  smm_rpi_serie              Int?
+  smm_rpi_num                Int?
+  smm_etq_lote_b2b           String?   @db.VarChar(30)
+  smm_tiss_stat_aut          String?   @db.VarChar(10)
+  smm_tiss_mdl               Int?
+  smm_lib_cc                 String?   @db.VarChar(1)
+  smm_cod_amostra_ini        String?   @db.VarChar(20)
+  smm_ind_rateio             String?   @db.Char(1)
+  smm_pro_cod                Decimal?  @db.Decimal(6, 0)
+  smm_cce_num                Int?
+  smm_lip_id                 Int?
+  smm_gmr_cod                Int?
+  smm_so_ind_aproveita       String?   @db.Char(1)
+  smm_tam_subconta           Int?
+  smm_vac_local_apl          String?   @db.Char(3)
+  smm_vac_via_apl            String?   @db.Char(1)
+  smm_vac_usr_apl            String?   @db.Char(10)
+  smm_vac_usr_lanc           String?   @db.Char(10)
+  smm_vac_dthr_lanc          DateTime? @db.DateTime
+  smm_lot_num                String?   @db.Char(20)
+  smm_vcn_dose               Int?
+  smm_senha_final            String?   @db.Char(1)
+  smm_loc_cod                String?   @db.Char(3)
+  smm_ind_sub_pacote         String?   @db.Char(1)
+  smm_dse_id                 Int?
+  smm_vlr_sem_reduc          Decimal?  @db.Decimal(20, 10)
+  smm_ind_click              String?   @db.VarChar(1)
+  smm_epl_serie              Int?
+  smm_epl_num                Int?
+  smm_tiss_guia_operadora    String?   @db.VarChar(30)
+  smm_dthr_exp               DateTime? @db.DateTime
+  smm_sus_vinculo            String?   @db.Char(2)
+  smm_ipasgo_ato             Int?
+  smm_token                  String?   @db.VarChar(255)
+  smm_cod_justificativa      Int?
+  smm_status_confirmacao     String?   @db.VarChar(25)
+  smm_funcao_ipasgo          Int?
+  smm_assist_pediatra_ipasgo String?   @db.Char(1)
+  smm_sequencial             Int?
+  smm_sequencial_autorizado  Int?
+  smm_guia_pai               String?   @db.VarChar(30)
+  smm_ind_exporta            String?   @db.Char(1)
+  smm_exs_item_id            Int?
+  smm_mot_tipo_cancel_rpi    String?   @db.Char(3)
+  smm_mot_cod_cancel_rpi     String?   @db.Char(5)
+  smm_obs_cancel_rpi         String?   @db.VarChar(255)
+  smm_id_integra             String?   @db.VarChar(100)
+  smm_dthr_ref_exp_tiss      DateTime? @db.DateTime
+  smm_pre_ccv_aut            String?   @db.VarChar(15)
+  smm_vlr_hora_esp           Float?
+  smm_consolidou_na_nfs      String?   @db.Char(1)
+  smm_dthr_xml_fatura        DateTime? @db.Date
+  smm_lote_b2b_fleury        String?   @db.VarChar(30)
+  smm_id_pleres              String?   @db.VarChar(50)
+
+  RCL RCL[]
+
+  OSM OSM  @relation(fields: [SMM_OSM_SERIE, SMM_OSM], references: [OSM_SERIE, OSM_NUM], onUpdate: NoAction, map: "smm_osm_fk")
+  PAC PAC? @relation(fields: [SMM_PAC_REG], references: [PAC_REG], onDelete: NoAction, onUpdate: NoAction, map: "smm_pac_fk")
+
+  SMK_SMM_SMM_TPCOD_SMM_CODToSMK                SMK  @relation("SMM_SMM_TPCOD_SMM_CODToSMK", fields: [SMM_TPCOD, SMM_COD], references: [SMK_TIPO, SMK_COD], onUpdate: NoAction, map: "smm_smk_fk")
+  SMK_SMM_SMM_PAI_SMK_TIPO_SMM_PAI_SMK_CODToSMK SMK? @relation("SMM_SMM_PAI_SMK_TIPO_SMM_PAI_SMK_CODToSMK", fields: [SMM_PAI_SMK_TIPO, SMM_PAI_SMK_COD], references: [SMK_TIPO, SMK_COD], onDelete: NoAction, onUpdate: NoAction, map: "smm_smk1_fk")
+
+  FLE FLE[]
+
+  @@id([SMM_OSM_SERIE, SMM_OSM, SMM_NUM], map: "SMM_PK")
+  @@index([SMM_COD_EXTERNO], map: "idx_smm_cod_ext")
+  @@index([SMM_EXEC], map: "idx_smm_exec")
+  @@index([SMM_COD_EXTERNO], map: "idx2")
+  @@index([SMM_IND_URG], map: "ix_IndexName")
+  @@index([SMM_CML_FAT_SERIE, SMM_CML_FAT_NUM], map: "smm_cml_fat_idx")
+  @@index([SMM_COD_AMOSTRA], map: "smm_cod_amo_idx")
+  @@index([SMM_PAC_REG, SMM_HSP_NUM, SMM_CTH_NUM], map: "smm_cth_idx")
+  @@index([SMM_CTLE_CNV], map: "smm_ctle_idx")
+  @@index([SMM_DT_RESULT], map: "smm_dt_result_idx")
+  @@index([SMM_DTHR_ALTER], map: "smm_dthr_alter_idx")
+  @@index([SMM_DTHR_COLETA], map: "smm_dthr_coleta_idx")
+  @@index([SMM_TPCOD, SMM_COD, SMM_DTHR_EXEC], map: "smm_dthr_idx")
+  @@index([SMM_EXEC], map: "smm_exec_cod_amostra_idx")
+  @@index([SMM_FAT_SERIE, SMM_FAT], map: "smm_fat_idx")
+  @@index([SMM_HON_SEQ], map: "smm_hon_idx")
+  @@index([SMM_PAC_REG, SMM_HSP_NUM, SMM_LAC_NUM], map: "smm_lac_idx")
+  @@index([SMM_MNS_SERIE, SMM_MNS_NUM], map: "smm_mns_idx")
+  @@index([SMM_MTE_SERIE, SMM_MTE_SEQ], map: "smm_mte_idx")
+  @@index([SMM_PAC_REG, SMM_DTHR_LANC], map: "smm_pac_lanc_idx")
+  @@index([SMM_OSM_SERIE, SMM_OSM, SMM_NUM, SMM_TPCOD, SMM_COD], map: "smm_rcl_idx")
+  @@index([SMM_SMA_SERIE, SMM_SMA_NUM, SMM_ISM_SEQ], map: "smm_sma_idx")
 }
 
 model STR {
@@ -558,6 +1504,9 @@ model STR {
   other_STR_STRToSTR_str_rota_str_cod   STR[] @relation("STRToSTR_str_rota_str_cod")
   other_STR_STRToSTR_STR_STR_COD        STR[] @relation("STRToSTR_STR_STR_COD")
   FLE                                   FLE[]
+  PSV                                   PSV[]
+  SMK                                   SMK[]
+  SMM                                   SMM[]
 
   @@index([STR_NOME, STR_COD], map: "str_nome")
   @@index([STR_TIPO], map: "STR_TIPO_IDX")

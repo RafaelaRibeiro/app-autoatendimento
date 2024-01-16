@@ -10,8 +10,19 @@ export class CreateServiceOrderDTO {
   beneficiaryCode: string;
 }
 
+export class CreateServiceOrderItemsDTO {
+  serviceOrderSerie: number;
+  serviceOrderNumber: number;
+  patientID: number;
+  examCode: string;
+  examType: string;
+  examValue: number;
+}
+
 export class MedicalFeesServiceDTO {
   examCode: string;
+  examType: string;
+  receptionDepartment: string;
   executingDepartment: string;
   doctorCode: number;
   insurance: string;
